@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MySettingActivity">
+    <include layout="@layout/action_bar" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="155dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/corner_shadow_shape"
+        android:translationZ="2dp">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/other_info_civ_head"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="18dp"
+            android:layout_marginTop="18dp"
+            android:src="@drawable/head"
+            app:civ_border_color="#4ddce2e9"
+            app:civ_border_width="4dp" />
+
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="18dp"
+            android:onClick="onShowCodeClicked"
+            android:layout_marginTop="18dp"
+            android:src="@drawable/code" />
+
+        <TextView
+            android:id="@+id/other_info_tv_nick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/other_info_civ_head"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="13dp"
+            android:text="用户昵称"
+            android:textColor="#404040"
+            android:textSize="17sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="15dp"
+                android:layout_marginLeft="20dp"
+                android:src="@drawable/phone_gray" />
+
+            <TextView
+                android:id="@+id/other_info_tv_phone_number"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="7dp"
+                android:layout_weight="1"
+                android:text="13812345678"
+                android:textColor="#b0afaf"
+                android:textSize="13sp" />
+
+        </LinearLayout>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:onClick="onMyCollectClicked"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="我的收藏"
+            android:textColor="#333333"
+            android:textSize="15sp" />
+     <ImageView
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:src="@drawable/forward"
+         android:layout_marginRight="15dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:onClick="onFileClicked"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="归档"
+            android:textColor="#333333"
+            android:textSize="15sp" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/forward"
+            android:layout_marginRight="15dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:onClick="onBlackListClicked"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="黑名单"
+            android:textColor="#333333"
+            android:textSize="15sp" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/forward"
+            android:layout_marginRight="15dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:onClick="onStorageClicked"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="存储空间"
+            android:textColor="#333333"
+            android:textSize="15sp" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/forward"
+            android:layout_marginRight="15dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:onClick="onAboutTshionClicked"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="关于Tshion"
+            android:textColor="#333333"
+            android:textSize="15sp" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/forward"
+            android:layout_marginRight="15dp"/>
+    </LinearLayout>
+    
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="50dp"
+        android:textSize="15sp"
+        android:textColor="#ff6379"
+        android:gravity="center"
+        android:onClick="onLogOutClicked"
+        android:text="退出当前账户"
+        android:layout_marginRight="50dp"/>
+    
+</LinearLayout>

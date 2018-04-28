@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@color/colorGray">
+
+    <TextView
+        android:id="@+id/menu_tv_verify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="20dp"
+        android:text="验证信息"
+        android:padding="5dp"
+        android:textColor="#518fff"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/menu_tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="20dp"
+        android:text="通讯录"
+        android:textColor="@color/colorBlack"
+        android:textSize="22dp" />
+
+    <LinearLayout
+        android:id="@+id/menu_ll_search"
+        android:layout_width="match_parent"
+        android:layout_height="43dp"
+        android:layout_below="@id/menu_tv_title"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/search_view_shape"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/search" />
+
+    </LinearLayout>
+
+    <include
+        android:id="@+id/menu_lv_headview"
+        layout="@layout/address_list_headview"
+        android:layout_width="match_parent"
+        android:layout_height="85dp"
+        android:layout_below="@id/menu_ll_search" />
+
+    <include
+        android:id="@+id/menu_lv_footview"
+        layout="@layout/address_list_footview"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:visibility="gone" />
+
+    <ListView
+        android:id="@+id/menu_lv_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/menu_lv_footview"
+        android:layout_below="@+id/menu_lv_headview"
+        android:divider="@color/transparent"
+        android:dividerHeight="5dp"></ListView>
+
+    <views.WordsNavigation
+        android:id="@+id/menu_wn_word"
+        android:layout_width="30dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/menu_lv_headview"
+        android:layout_marginTop="5dp" />
+
+    <TextView
+        android:id="@+id/menu_tv_tips"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/tvstyle"
+        android:gravity="center"
+        android:textSize="40sp"
+        android:visibility="gone" />
+</RelativeLayout>

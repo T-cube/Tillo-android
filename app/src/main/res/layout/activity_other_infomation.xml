@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".OtherInfomationActivity">
+
+    <include layout="@layout/action_bar" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="155dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/corner_shadow_shape"
+        android:translationZ="2dp">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/other_info_civ_head"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="18dp"
+            android:layout_marginTop="18dp"
+            android:src="@drawable/head"
+            app:civ_border_color="#4ddce2e9"
+            app:civ_border_width="4dp" />
+
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="18dp"
+            android:layout_marginTop="18dp"
+            android:onClick="onShowCodeClicked"
+            android:src="@drawable/code" />
+
+        <TextView
+            android:id="@+id/other_info_tv_nick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/other_info_civ_head"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="13dp"
+            android:text="用户昵称"
+            android:textColor="#404040"
+            android:textSize="17sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="15dp"
+                android:layout_marginLeft="20dp"
+                android:src="@drawable/phone_gray" />
+
+            <TextView
+                android:id="@+id/other_info_tv_phone_number"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="7dp"
+                android:layout_weight="1"
+                android:text="13812345678"
+                android:textColor="#b0afaf"
+                android:textSize="13sp" />
+
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginRight="5dp"
+                android:padding="5dp"
+                android:onClick="onCallChatClicked"
+                android:src="@drawable/call" />
+
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginRight="5dp"
+                android:padding="5dp"
+                android:onClick="onVideoChatClicked"
+                android:src="@drawable/video" />
+
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginRight="10dp"
+                android:padding="5dp"
+                android:onClick="onUploadFileClicked"
+                android:src="@drawable/upload" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:onClick="onAlertRemarkClicked"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="备注"
+            android:textColor="#333333"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/other_info_tv_remark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:text="备注名称"
+
+            android:textColor="#999999"
+            android:textSize="13sp" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:src="@drawable/forward" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="置顶聊天"
+            android:textColor="#333333"
+            android:textSize="15sp" />
+
+        <com.kyleduo.switchbutton.SwitchButton
+            android:id="@+id/other_info_tv_stick"
+            style="@style/SwitchButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:kswAnimationDuration="300"
+            app:kswBackDrawable="@drawable/ios_back_drawable"
+            app:kswThumbDrawable="@drawable/ios_thumb_selector"
+            app:kswThumbMarginBottom="-8dp"
+            app:kswThumbMarginLeft="-5dp"
+            app:kswThumbMarginRight="-5dp"
+            app:kswThumbMarginTop="-2.5dp"
+            app:kswThumbRangeRatio="1.4" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="消息勿扰"
+            android:textColor="#333333"
+            android:textSize="15sp" />
+
+        <com.kyleduo.switchbutton.SwitchButton
+            android:id="@+id/other_info_tv_no_disturb"
+            style="@style/SwitchButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:kswAnimationDuration="300"
+            app:kswBackDrawable="@drawable/ios_back_drawable"
+            app:kswThumbDrawable="@drawable/ios_thumb_selector"
+            app:kswThumbMarginBottom="-8dp"
+            app:kswThumbMarginLeft="-5dp"
+            app:kswThumbMarginRight="-5dp"
+            app:kswThumbMarginTop="-2.5dp"
+            app:kswThumbRangeRatio="1.4" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:onClick="onAddBlackListClicked"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="加入黑名单"
+            android:textColor="#333333"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:onClick="onDeleteUserClicked"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="删除联系人"
+            android:textColor="#ff6379"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+</LinearLayout>

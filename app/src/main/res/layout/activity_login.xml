@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".LoginActivity">
+
+    <ImageView
+        android:layout_width="108dp"
+        android:layout_height="31dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="104dp"
+        android:src="@drawable/logo" />
+    <!--手机号码-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="66dp"
+        android:background="@drawable/search_view_shape"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="15dp"
+            android:layout_height="24dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/phone" />
+
+        <EditText
+            android:id="@+id/login_et_phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="10dp"
+            android:background="@null"
+            android:hint="请输入手机号"
+            android:text="98935954"
+            android:inputType="number" />
+
+    </LinearLayout>
+    <!--密码-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/search_view_shape"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="15dp"
+            android:layout_height="24dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/password" />
+
+        <EditText
+            android:id="@+id/login_et_pwd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="10dp"
+            android:background="@null"
+            android:hint="请输入密码"
+            android:text="123456"
+            android:inputType="textPassword" />
+
+    </LinearLayout>
+    <!--忘记密码-->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="15dp"
+        android:text="忘记密码？"
+        android:textColor="#518fff"
+        android:textSize="13sp" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="56dp"
+        android:background="@drawable/menu_corner_blue_shape"
+        android:onClick="onLoginClicked"
+        android:text="登录"
+        android:textColor="#ffffff"
+        android:textSize="15sp" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/menu_corner_white_shape"
+        android:onClick="onRegisterClicked"
+        android:text="注册"
+        android:textColor="#518fff"
+        android:textSize="15sp" />
+</LinearLayout>

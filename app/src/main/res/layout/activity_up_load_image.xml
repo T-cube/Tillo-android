@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".UpLoadImageActivity">
+
+    <include
+        layout="@layout/action_bar"
+        android:layout_width="match_parent"
+        android:layout_height="48dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="12dp"
+        android:text="设置头像"
+        android:textColor="#404040"
+        android:textSize="20sp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="140dp">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/upload_civ_headimg"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="30dp" />
+
+        <ImageView
+            android:id="@+id/upload_iv_choose"
+            android:layout_width="32dp"
+            android:layout_height="26dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignRight="@id/upload_civ_headimg"
+            android:layout_marginBottom="20dp"
+            android:layout_marginRight="20dp"
+            android:src="@drawable/photo" />
+    </RelativeLayout>
+</LinearLayout>

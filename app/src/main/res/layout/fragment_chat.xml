@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f7f7f7"
+    android:orientation="vertical">
+    <!--toolbar-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="5dp">
+
+        <ImageView
+            android:id="@+id/fragment_chat_iv_address_book"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:padding="5dp"
+            android:src="@drawable/sms" />
+
+        <ImageView
+            android:id="@+id/fragment_chat_iv_more"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_alignParentRight="true"
+            android:padding="5dp"
+            android:src="@drawable/more" />
+
+        <ImageView
+            android:id="@+id/fragment_chat_iv_fast"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginRight="5dp"
+            android:layout_toLeftOf="@id/fragment_chat_iv_more"
+            android:padding="5dp"
+            android:src="@drawable/fast" />
+    </RelativeLayout>
+    <!--搜索框-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="43dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/search_view_shape"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/search" />
+    </LinearLayout>
+
+    <com.hankkin.library.RefreshSwipeMenuListView
+        android:id="@+id/fragment_chat_rsmlv_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="20dp"
+        android:divider="@color/transparent"
+        android:dividerHeight="0dp" />
+
+</LinearLayout>

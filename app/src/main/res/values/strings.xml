@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Tillo</string>
+
+
+    <!--录音  提示-->
+    <string name="str_recorder_normal">按住说话</string>
+    <string name="str_recorder_recording">松开结束</string>
+    <string name="str_recorder_want_cancel">松开手指，取消发送</string>
+    <string name="request_permission">This sample needs camera permission.</string>
+    <string name="camera_error">This device doesn\'t support Camera2 API.</string>
+    <string name="save_ing">保存图片.</string>
+    <string name="all_image">All Images</string>
+</resources>

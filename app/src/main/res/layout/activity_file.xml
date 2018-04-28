@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".BlackListActivity">
+
+    <include
+        layout="@layout/action_bar"
+        android:layout_width="match_parent"
+        android:layout_height="48dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="12dp"
+        android:text="归档"
+        android:textColor="#404040"
+        android:textSize="20sp" />
+
+    <com.hankkin.library.RefreshSwipeMenuListView
+        android:id="@+id/black_list_rsmlv_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorGray"
+        android:divider="@color/transparent"
+        android:dividerHeight="0dp" />
+
+</LinearLayout>

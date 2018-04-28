@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "/Users/yumeng/workspace/MyTshion/Tshion/matisse/build/intermediates/incremental/mergeDebugAndroidTestResources/merged.dir/values-zh/values-zh.xml",
+            "map": [
+                {
+                    "source": "/Users/yumeng/workspace/MyTshion/Tshion/matisse/build/intermediates/bundles/debug/res/values-zh/values-zh.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,101,151,203,246,289,335,383,436,500,561,626,680,740,795",
+                        "endColumns": "45,49,51,42,42,45,47,52,63,60,64,53,59,54,50",
+                        "endOffsets": "96,146,198,241,284,330,378,431,495,556,621,675,735,790,841"
+                    }
+                }
+            ]
+        }
+    ]
+}
