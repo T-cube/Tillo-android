@@ -5,18 +5,19 @@ package constants;
  */
 
 public class Constants {
-    public static final boolean Debug = false;//false为线上
+    public static final boolean Debug = true;//false为线上
     public static final String APP_FIRST_IN = "app_first_inf";
     public static final String APP_USER_INFO = "app_user_info";
     public static final String APP_IMAGE_TOKEN = "app_image_token";
     public static final String APP_USER_CONFIG = "app_user_config";
     public static final String APPNAME = "tshion";
-    public static final String BaseUrl = Debug ? "http://180.178.124.2:3333" : "http://192.168.1.237:3333";
-    public static final String TSHION_URL = Debug ? "http://180.178.124.2:9999/api" : "http://192.168.1.237:9999/api";
+    public static final String BaseUrl = Debug ? "http://119.28.43.121:3333" : "http://192.168.1.237:3333";
+//    http://180.178.124.2:3333
+    public static final String TSHION_URL = Debug ? "http://119.28.43.121:9999/api" : "http://192.168.1.237:9999/api";
     public static final String ROOM_ID_LIST = "chatUserBean";
     public static final String FileProviderAuthorities = "com.qihuo.tshion.fileprovider";//类名+fileprovider
     //ip
-    public static final String SOCKET_IP = Debug ? "180.178.124.2" : "192.168.1.237";
+    public static final String SOCKET_IP = Debug ? "119.28.43.121" : "192.168.1.237";
     //端口号
     public static final int SOCKET_PORT = 3014;
     //EventBus 数据分发 标识

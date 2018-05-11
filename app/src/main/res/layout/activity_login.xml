@@ -38,7 +38,6 @@
             android:layout_marginRight="10dp"
             android:background="@null"
             android:hint="请输入手机号"
-            android:text="98935954"
             android:inputType="number" />
 
     </LinearLayout>
@@ -68,7 +67,6 @@
             android:layout_marginRight="10dp"
             android:background="@null"
             android:hint="请输入密码"
-            android:text="123456"
             android:inputType="textPassword" />
 
     </LinearLayout>
