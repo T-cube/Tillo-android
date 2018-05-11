@@ -1,6 +1,7 @@
 package utils;
 
 import android.media.MediaRecorder;
+import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,16 +66,15 @@ public class AudioManager {
             File file = new File(dir, fileName);
 
             mCurrentFilePath = file.getAbsolutePath();
-
             mMediaRecorder = new MediaRecorder();
             //设置输出文件
             mMediaRecorder.setOutputFile(file.getAbsolutePath());
             //设置MediaRecorder的音频源为麦克风
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             //设置音频格式
-            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.RAW_AMR);
+            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
             //设置音频的格式为amr
-            mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             mMediaRecorder.prepare();
             mMediaRecorder.start();
             //准备结束
@@ -91,7 +91,7 @@ public class AudioManager {
 //    算法的核心思想是结合机器的网卡、当地时间、一个随即数来生成GUID
 //    .amr音频文件
     private String generateFileName() {
-        return UUID.randomUUID().toString() + ".amr";
+        return UUID.randomUUID().toString() + ".aac";
     }
 
     public int getVoiceLevel(int maxLevel) {

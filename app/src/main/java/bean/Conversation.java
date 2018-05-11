@@ -52,7 +52,6 @@ public class Conversation extends DataSupport {
     }
 
     public List<FriendInfo> getFriendInfo() {
-
         return DataSupport.where("roomid=?", roomid).find(FriendInfo.class);
     }
 

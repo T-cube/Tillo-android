@@ -1,6 +1,9 @@
 package utils;
 
 import android.media.MediaPlayer;
+import android.util.Log;
+
+import java.io.IOException;
 
 /**
  * @param
@@ -41,8 +44,10 @@ public class MediaPlayerManager {
             mMediaPlayer.setDataSource(filePath);
             mMediaPlayer.prepare();
             mMediaPlayer.start();
-        } catch (Exception e) {
-
+        } catch (IllegalStateException e) {
+            Log.e("IllegalStateException", e.getMessage() + filePath);
+        } catch (IOException e) {
+            Log.e("IOException", e.getMessage() + filePath);
         }
     }
 
@@ -95,5 +100,12 @@ public class MediaPlayerManager {
         else
             return false;
     }
+
+    public static void stop() {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.stop();
+        }
+    }
+
 
 }

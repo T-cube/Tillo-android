@@ -1,18 +1,33 @@
 package views;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 
 
+import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.yumeng.tillo.R;
+import com.yumeng.tillo.UpLoadImageActivity;
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.impl.GlideEngine;
+
+import java.io.File;
+
+import bean.UserInfo;
+import utils.AppSharePre;
 import utils.AudioManager;
 import utils.DialogManager;
+import utils.fileutil.FileUtils;
 
 /**
  * 自定义按钮 实现录音等功能
@@ -46,6 +61,7 @@ public class AudioRecorderButton extends android.support.v7.widget.AppCompatButt
     private static final int MSG_VOICE_CHANGED = 0x111;
     //取消提示对话框
     private static final int MSG_DIALOG_DIMISS = 0x112;
+    private RxPermissions rxPermissions;
 
     /**
      * @description 获取音量大小的线程
@@ -96,10 +112,12 @@ public class AudioRecorderButton extends android.support.v7.widget.AppCompatButt
 
     public AudioRecorderButton(Context context, AttributeSet attrs) {
         super(context, attrs);
+        rxPermissions = new RxPermissions((Activity) context);
         mDialogManager = new DialogManager(context);
         //录音文件存放地址
-        String dir = Environment.getExternalStorageDirectory() + "/ldm_voice";
-        mAudioManager = AudioManager.getInstance(dir);
+        UserInfo userInfo = AppSharePre.getPersonalInfo();
+        String fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getUid();
+        mAudioManager = AudioManager.getInstance(fileForderPath);
         mAudioManager.setOnAudioStateListener(new AudioManager.AudioStateListener() {
             public void wellPrepared() {
                 mHandler.sendEmptyMessage(MSG_AUDIO_PREPARED);
@@ -110,6 +128,23 @@ public class AudioRecorderButton extends android.support.v7.widget.AppCompatButt
         setOnLongClickListener(new OnLongClickListener() {
 
             public boolean onLongClick(View v) {
+//                rxPermissions.request(Manifest.permission.RECORD_AUDIO,
+//                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//                        .subscribe(new io.reactivex.functions.Consumer<Boolean>() {
+//                            @Override
+//                            public void accept(Boolean aBoolean) throws Exception {
+//                                //权限已经开启   enableCrop:是否裁剪
+//                                if (aBoolean) {
+//                                    mReady = true;
+//                                    mAudioManager.prepareAudio();
+//                                } else {
+//                                    //未开启权限，弹出提示框
+//
+//                                }
+//
+//
+//                            }
+//                        });
                 mReady = true;
                 mAudioManager.prepareAudio();
                 return false;
@@ -155,6 +190,14 @@ public class AudioRecorderButton extends android.support.v7.widget.AppCompatButt
         switch (action) {
             case MotionEvent.ACTION_DOWN://手指按下
                 changeState(STATE_RECORDING);
+                rxPermissions.request(Manifest.permission.RECORD_AUDIO,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        .subscribe(new io.reactivex.functions.Consumer<Boolean>() {
+                            @Override
+                            public void accept(Boolean aBoolean) throws Exception {
+
+                            }
+                        });
                 break;
             case MotionEvent.ACTION_MOVE://手指移动
                 if (isRecording) {

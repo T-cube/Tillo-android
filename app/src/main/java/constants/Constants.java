@@ -19,6 +19,14 @@ public class Constants {
     public static final String SOCKET_IP = Debug ? "180.178.124.2" : "192.168.1.237";
     //端口号
     public static final int SOCKET_PORT = 3014;
+    //EventBus 数据分发 标识
+    public static final String MESSAGE_EVENT_HAS_MESSAGE = "updateMessageList";//收到新消息
+    public static final String MESSAGE_EVENT_FRIEND_NEW = "newFriend";//更新验证信息列表
+    public static final String MESSAGE_EVENT_FRIEND_AGREE = "agreeWithYou";//更新好友列表
+    public static final String MESSAGE_EVENT_INIT_CONVERSATION = "updateConversationList";//更新会话列表
+    public static final String TARGET_CHAT_FRAGMENT = "chatFragment";
+    public static final String TARGET_CHAT_ACTIVITY = "chatActivity";
+    public static final String TARGET_MAIN_ACTIVITY = "mainActivity";
 
     /**
      * 接口地址
@@ -53,5 +61,8 @@ public class Constants {
     public static final String getGroup = "/user/friends/info/";
     //获取聊天记录
     public static final String getHistory = "/message/";
-    //获取最新记录
+    //上传文件
+    public static final String uploadFile = "/file";
+    //下载音频文件
+    public static final String downloadFile = "/file/audio/";
 }

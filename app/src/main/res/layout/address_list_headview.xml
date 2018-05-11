@@ -62,7 +62,7 @@
                 android:layout_height="56dp"
                 android:layout_centerVertical="true"
                 android:src="@drawable/head"
-                android:translationZ="2dp"
+                android:translationZ="4dp"
                 app:civ_border_color="#dce2e9"
                 app:civ_border_width="2dp" />
         </RelativeLayout>

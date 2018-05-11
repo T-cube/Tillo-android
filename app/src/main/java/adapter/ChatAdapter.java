@@ -1,29 +1,45 @@
 package adapter;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.lzy.okgo.OkGo;
+import com.lzy.okgo.callback.FileCallback;
+import com.lzy.okgo.model.Response;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.yumeng.tillo.R;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.logging.Handler;
 
 import application.MyApplication;
 import bean.ChatMessage;
 import bean.UserInfo;
+import constants.Constants;
 import de.hdodenhof.circleimageview.CircleImageView;
 import listener.OnItemClickListener;
 import utils.AppSharePre;
 import utils.DataUtils;
+import utils.MediaPlayerManager;
 import utils.Utils;
+import utils.fileutil.FileUtils;
 import views.ProcessImageView;
 
 /**
@@ -47,11 +63,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private UserInfo userInfo;
     private Context mContext;
     private String avatar;
+    private int mPosition = -1;
+    private String fileForderPath;
+    private RxPermissions rxPermissions;
+    private ArrayList<String> downloadList;
 
     public ChatAdapter(Context context, String avatar) {
         this.mContext = context;
         this.avatar = avatar;
         userInfo = AppSharePre.getPersonalInfo();
+        fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getUid();
+        rxPermissions = new RxPermissions((Activity) context);
+        downloadList = new ArrayList<>();
     }
 
     public void setmDatas(List<ChatMessage> mList) {
@@ -115,18 +138,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
-        ChatMessage bean = mDatas.get(position);
-        if (mOnItemClickListener != null) {
-            //添加点击事件
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int pos = holder.getLayoutPosition();
-                    mOnItemClickListener.onItemClick(holder.itemView, pos);
-                }
-            });
-        }
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+        final ChatMessage bean = mDatas.get(position);
+//        if (mOnItemClickListener != null) {
+//            //添加点击事件
+//            holder.itemView.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    int pos = holder.getLayoutPosition();
+//                    mOnItemClickListener.onItemClick(holder.itemView, pos);
+//                }
+//            });
+//        }
         switch (getItemViewType(position)) {
             case CHAT_SEND_TXT:
                 //发送文本
@@ -141,13 +164,57 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 chatImageSendHolder.dateTv.setText("今天");
                 chatImageSendHolder.timeTv.setText("11：30PM");
                 Glide.with(MyApplication.getContext()).load(R.drawable.head).into(chatImageSendHolder.imageIv);
+                //添加点击事件
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                    }
+                });
                 break;
             case CHAT_SEND_VOICE:
                 //发送语音
-                ChatVoiceSendHolder chatVoiceSendHolder = (ChatVoiceSendHolder) holder;
+                final ChatVoiceSendHolder chatVoiceSendHolder = (ChatVoiceSendHolder) holder;
                 chatVoiceSendHolder.dateTv.setText("今天");
-                chatVoiceSendHolder.timeTv.setText("11:30PM");
-                //播放语音
+                chatVoiceSendHolder.durationTv.setText(bean.getDuration() + "'");
+                chatVoiceSendHolder.timeTv.setText(DataUtils.times7(bean.getTimestamp()));
+                if (mPosition == position) {
+                    chatVoiceSendHolder.stopIv.setVisibility(View.VISIBLE);
+                    chatVoiceSendHolder.playIv.setVisibility(View.GONE);
+                } else {
+                    chatVoiceSendHolder.playIv.setVisibility(View.VISIBLE);
+                    chatVoiceSendHolder.stopIv.setVisibility(View.GONE);
+                }
+                chatVoiceSendHolder.stopIv.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        MediaPlayerManager.stop();
+                        mPosition = -1;
+                        notifyDataSetChanged();
+                    }
+                });
+                //添加点击事件
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.e("sourceId", bean.getSourceid());
+                        //播放语音
+                        if (!TextUtils.isEmpty(bean.getLocal_path())) {
+                            //播放语音
+                            mPosition = position;
+                            notifyDataSetChanged();
+                            MediaPlayerManager.playSound(bean.getLocal_path(), new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mediaPlayer) {
+                                    //播放完成，关闭动画
+                                    MediaPlayerManager.stop();
+                                    mPosition = -1;
+                                    notifyDataSetChanged();
+                                }
+                            });
+                        }
+
+                    }
+                });
                 break;
             case CHAT_RECEIVE_TXT:
                 //接收文本信息
@@ -163,12 +230,80 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 chatImageReceivedHolder.dateTv.setText("今天");
                 chatImageReceivedHolder.timeTv.setText("11:30PM");
                 Glide.with(MyApplication.getContext()).load(R.drawable.head).into(chatImageReceivedHolder.imageIv);
+                //添加点击事件
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
                 break;
             case CHAT_RECEIVE_VOICE:
                 //接收语音
-                ChatVoiceReceivedHolder chatVoiceReceivedHolder = (ChatVoiceReceivedHolder) holder;
+                final ChatVoiceReceivedHolder chatVoiceReceivedHolder = (ChatVoiceReceivedHolder) holder;
                 chatVoiceReceivedHolder.dateTv.setText("今天");
-                chatVoiceReceivedHolder.timeTv.setText("11:30PM");
+                chatVoiceReceivedHolder.timeTv.setText(DataUtils.times7(bean.getTimestamp()));
+                chatVoiceReceivedHolder.durationTv.setText(bean.getDuration() + "'");
+                if (mPosition == position) {
+                    chatVoiceReceivedHolder.stopIv.setVisibility(View.VISIBLE);
+                    chatVoiceReceivedHolder.playIv.setVisibility(View.GONE);
+                    chatVoiceReceivedHolder.progressPb.setVisibility(View.GONE);
+                    chatVoiceReceivedHolder.stopIv.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            //播放完成，关闭动画
+                            MediaPlayerManager.stop();
+                            mPosition = -1;
+                            notifyDataSetChanged();
+                        }
+                    });
+                } else {
+                    chatVoiceReceivedHolder.playIv.setVisibility(View.VISIBLE);
+                    chatVoiceReceivedHolder.stopIv.setVisibility(View.GONE);
+                    chatVoiceReceivedHolder.progressPb.setVisibility(View.GONE);
+                }
+                Glide.with(MyApplication.getContext()).load(R.drawable.head).into(chatVoiceReceivedHolder.headIv);
+                //添加点击事件
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //播放语音
+                        if (!TextUtils.isEmpty(bean.getLocal_path())) {
+                            //播放语音
+                            mPosition = position;
+                            notifyDataSetChanged();
+                            MediaPlayerManager.playSound(bean.getLocal_path(), new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mediaPlayer) {
+                                    //播放完成，关闭动画
+                                    MediaPlayerManager.stop();
+                                    mPosition = -1;
+                                    notifyDataSetChanged();
+                                }
+                            });
+                        } else {
+                            chatVoiceReceivedHolder.itemView.setEnabled(false);
+                            chatVoiceReceivedHolder.progressPb.setVisibility(View.VISIBLE);
+                            chatVoiceReceivedHolder.playIv.setVisibility(View.GONE);
+                            chatVoiceReceivedHolder.stopIv.setVisibility(View.GONE);
+                            rxPermissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                    .subscribe(new io.reactivex.functions.Consumer<Boolean>() {
+                                        @Override
+                                        public void accept(Boolean aBoolean) throws Exception {
+                                            //权限已经开启
+                                            if (aBoolean) {
+                                                downloadAudioFile(bean.getSourceid(), chatVoiceReceivedHolder, bean, position);
+                                            } else {
+                                                //未开启权限，弹出提示框
+
+                                            }
+
+
+                                        }
+                                    });
+                        }
+                    }
+                });
                 break;
 
 
@@ -305,15 +440,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     class ChatVoiceSendHolder extends RecyclerView.ViewHolder {
         private TextView dateTv, timeTv, durationTv;
         private LinearLayout contentLl;
-        private SeekBar voiceBar;
+        private ProgressBar progressPb;
+        private ImageView playIv, stopIv;
 
         public ChatVoiceSendHolder(View itemView) {
             super(itemView);
             dateTv = Utils.findViewsById(itemView, R.id.item_chat_txt_right_date);
             contentLl = Utils.findViewsById(itemView, R.id.item_chat_right_voice_ll_content);
             timeTv = Utils.findViewsById(itemView, R.id.item_chat_txt_right_time);
-            durationTv = Utils.findViewsById(itemView, R.id.itme_chat_right_voice_tv_duration);
-            voiceBar = Utils.findViewsById(itemView, R.id.item_chat_right_voice_sb_seekbar);
+            durationTv = Utils.findViewsById(itemView, R.id.item_chat_txt_right_duration);
+            progressPb = Utils.findViewsById(itemView, R.id.item_chat_voice_right_progress);
+            playIv = Utils.findViewsById(itemView, R.id.item_chat_voice_right_plays);
+            stopIv = Utils.findViewsById(itemView, R.id.item_chat_voice_right_stop);
         }
     }
 
@@ -323,17 +461,66 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     class ChatVoiceReceivedHolder extends RecyclerView.ViewHolder {
         private TextView dateTv, timeTv, durationTv;
         private LinearLayout contentLl;
-        private SeekBar voiceBar;
+        private ProgressBar progressPb;
+        private ImageView playIv, stopIv;
+        private CircleImageView headIv;
 
         public ChatVoiceReceivedHolder(View itemView) {
             super(itemView);
             dateTv = Utils.findViewsById(itemView, R.id.item_chat_txt_right_date);
             timeTv = Utils.findViewsById(itemView, R.id.item_chat_txt_left_time);
-            durationTv = Utils.findViewsById(itemView, R.id.itme_chat_left_voice_tv_duration);
+            durationTv = Utils.findViewsById(itemView, R.id.item_chat_txt_left_duration);
             contentLl = Utils.findViewsById(itemView, R.id.item_chat_left_voice_ll_content);
-            voiceBar = Utils.findViewsById(itemView, R.id.item_chat_left_voice_sb_seekbar);
+            progressPb = Utils.findViewsById(itemView, R.id.item_chat_voice_left_progress);
+            playIv = Utils.findViewsById(itemView, R.id.item_chat_voice_left_plays);
+            stopIv = Utils.findViewsById(itemView, R.id.item_chat_voice_left_stop);
+            headIv = Utils.findViewsById(itemView, R.id.item_chat_civ_head);
         }
     }
 
 
+    //下载音频文件
+    public void downloadAudioFile(String url, final ChatVoiceReceivedHolder chatVoiceReceivedHolder, final ChatMessage message, final int position) {
+        final String fileName = generateFileName();
+        Log.e("audioReusult", Constants.TSHION_URL + Constants.downloadFile + url);
+//        Constants.TSHION_URL + Constants.downloadFile + url
+        OkGo.<File>get(Constants.TSHION_URL + Constants.downloadFile + url)
+                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
+                .execute(new FileCallback(fileForderPath, fileName) {
+                    @Override
+                    public void onSuccess(Response<File> response) {
+                        File file = response.body();
+                        Log.e("TAG", file.getAbsolutePath());
+                        //保存文件
+                        ChatMessage item = new ChatMessage();
+                        item.setLocal_path(file.getAbsolutePath());
+                        item.setSourceid(message.getSourceid());
+                        item.setTimestamp(message.getTimestamp());
+                        item.setRoomid(message.getRoomid());
+                        item.setTarget(message.getTarget());
+                        item.setFrom(message.getFrom());
+                        item.setMessage_id(message.getMessage_id());
+                        item.setDuration(message.getDuration());
+                        item.setType(message.getType());
+                        item.setContent(message.getContent());
+                        message.setLocal_path(file.getAbsolutePath());
+                        mDatas.set(position, message);
+                        boolean isSave = item.saveOrUpdate("roomid=? and timestamp=?", message.getRoomid(), message.getTimestamp() + "");
+                        chatVoiceReceivedHolder.itemView.setEnabled(true);
+                        notifyDataSetChanged();
+
+                    }
+
+                    @Override
+                    public void onError(Response<File> response) {
+                        chatVoiceReceivedHolder.itemView.setEnabled(true);
+                        notifyDataSetChanged();
+
+                    }
+                });
+    }
+
+    private String generateFileName() {
+        return UUID.randomUUID().toString() + ".aac";
+    }
 }

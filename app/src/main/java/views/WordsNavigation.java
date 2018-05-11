@@ -52,8 +52,8 @@ public class WordsNavigation extends View {
         wordsPaint = new Paint();
         wordsPaint.setColor(Color.parseColor("#F7F7F7"));
         wordsPaint.setAntiAlias(true);
-        wordsPaint.setTextSize(40);
-        wordsPaint.setTypeface(Typeface.DEFAULT_BOLD);
+        wordsPaint.setTextSize(30);
+        wordsPaint.setTypeface(Typeface.DEFAULT);
 //        bgPaint = new Paint();
 //        bgPaint.setAntiAlias(true);
 //        bgPaint.setColor(Color.parseColor("#1dcdef"));

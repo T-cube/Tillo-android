@@ -5,28 +5,40 @@ package bean;
  */
 
 public class MessageEvent {
-    private String messageType;
-    private String message;
+    private String target;//接收对象
+    private String behavior;//行为
+    private ChatMessage chatMessage;//消息对象
 
-    public MessageEvent(String messageType) {
-        this.messageType = messageType;
+    public MessageEvent() {
     }
 
-    public String getMessageType() {
-        return messageType;
+    public MessageEvent(String target, String behavior, ChatMessage chatMessage) {
+        this.target = target;
+        this.behavior = behavior;
+        this.chatMessage = chatMessage;
     }
 
-    public void setMessageType(String messageType) {
-        this.messageType = messageType;
+    public String getTarget() {
+        return target;
     }
 
-    public String getMessage() {
-        return message;
+    public void setTarget(String target) {
+        this.target = target;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public String getBehavior() {
+        return behavior;
     }
 
+    public void setBehavior(String behavior) {
+        this.behavior = behavior;
+    }
 
+    public ChatMessage getChatMessage() {
+        return chatMessage;
+    }
+
+    public void setChatMessage(ChatMessage chatMessage) {
+        this.chatMessage = chatMessage;
+    }
 }

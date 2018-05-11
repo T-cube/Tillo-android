@@ -18,19 +18,28 @@ public class ChatMessage extends DataSupport implements Serializable {
     private String content;
     private String from;
     private String target;
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String roomid;
     private long timestamp;
     private String type;
     private String local_path;
-    private String url;
+    private String sourceid;
+    private String duration;
 
-    public String getUrl() {
-        return url;
+    public String getDuration() {
+        return duration;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public String getSourceid() {
+        return sourceid;
+    }
+
+    public void setSourceid(String sourceid) {
+        this.sourceid = sourceid;
     }
 
     public String getMessage_id() {

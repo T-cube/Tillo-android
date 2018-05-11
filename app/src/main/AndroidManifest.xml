@@ -48,9 +48,7 @@
         <activity android:name=".SetRemarkActivity" />
         <activity android:name=".MySettingActivity" />
         <activity android:name=".LargeImageActivity" />
-        <activity
-            android:name=".ChatActivity"
-            android:launchMode="singleTask" />
+        <activity android:name=".ChatActivity" />
         <activity android:name=".SetPasswordActivity" />
         <activity android:name=".TelDetailActivity" />
         <activity android:name=".AboutUsActivity" />

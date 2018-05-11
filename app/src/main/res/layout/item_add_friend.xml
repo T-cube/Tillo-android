@@ -54,7 +54,6 @@
                     android:layout_width="15dp"
                     android:layout_height="20dp"
                     android:src="@drawable/phone"
-                    android:text="13812345678"
                     android:textColor="#b0afaf" />
 
                 <TextView
@@ -62,7 +61,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
-                    android:text="13812345678"
                     android:textColor="#b0afaf"
                     android:textSize="13sp" />
             </LinearLayout>

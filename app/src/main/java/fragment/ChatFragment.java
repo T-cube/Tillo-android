@@ -26,6 +26,9 @@ import com.yumeng.tillo.ChatActivity;
 import com.yumeng.tillo.MainActivity;
 import com.yumeng.tillo.R;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
 import org.litepal.crud.callback.FindMultiCallback;
@@ -41,9 +44,12 @@ import bean.ChatMessage;
 import bean.ChatUserBean;
 import bean.Conversation;
 import bean.FriendInfo;
+import bean.MessageEvent;
 import bean.UserInfo;
+import constants.Constants;
 import pomelo.DataCallBack;
 import pomelo.PomeloClient;
+import service.PomeloService;
 import utils.AppSharePre;
 import utils.CommonPopupWindow;
 import utils.ToastUtils;
@@ -71,6 +77,7 @@ public class ChatFragment extends BaseFragment implements RefreshSwipeMenuListVi
 
     @Override
     protected void initView(View view, Bundle savedInstanceState) {
+        EventBus.getDefault().register(this);
         userInfo = AppSharePre.getPersonalInfo();
         rsmLv = Utils.findViewsById(view, R.id.fragment_chat_rsmlv_listview);
         addressBookIv = Utils.findViewsById(view, R.id.fragment_chat_iv_address_book);
@@ -204,9 +211,8 @@ public class ChatFragment extends BaseFragment implements RefreshSwipeMenuListVi
             @Override
             public void run() {
                 rsmLv.complete();
-                ToastUtils.getInstance().shortToast("下拉刷新");
             }
-        }, 2000);
+        }, 300);
 
     }
 
@@ -220,9 +226,8 @@ public class ChatFragment extends BaseFragment implements RefreshSwipeMenuListVi
             @Override
             public void run() {
                 rsmLv.complete();
-                ToastUtils.getInstance().shortToast("加载更多");
             }
-        }, 2000);
+        }, 300);
     }
 
     public int dp2px(int dp, Context context) {
@@ -260,7 +265,8 @@ public class ChatFragment extends BaseFragment implements RefreshSwipeMenuListVi
     private CommonPopupWindow popupWindow;
 
     //获取聊天信息
-    public void initChatInfo(PomeloClient client) {
+    public void initChatInfo() {
+        PomeloClient client = PomeloService.getInstance().getClient();
         JSONObject msg = new JSONObject();
         client.request("account.accountHandler.initInfo", msg, new DataCallBack() {
             @Override
@@ -293,7 +299,26 @@ public class ChatFragment extends BaseFragment implements RefreshSwipeMenuListVi
             Conversation conversation = new Conversation();
             conversation.setRoomid(list.get(i).getMessage().getRoomid());
             conversation.setTimestamp(list.get(i).getMessage().getTimestamp());
-            conversation.setContent(list.get(i).getMessage().getContent());
+            switch (list.get(i).getMessage().getType()) {
+                case "text":
+                    conversation.setContent(list.get(i).getMessage().getContent());
+                    break;
+                case "image":
+                    conversation.setContent("...[图片]");
+                    break;
+                case "audio":
+                    conversation.setContent("...[语音]");
+                    break;
+                case "file":
+                    conversation.setContent("...[文件]");
+                    break;
+                case "video":
+                    conversation.setContent("...[视频]");
+                    break;
+//                case "link":
+//                    conversation.setContent();
+//                    break;
+            }
             conversation.saveOrUpdate("roomid=?", list.get(i).getMessage().getRoomid());
             tempList.add(conversation);
         }
@@ -337,11 +362,11 @@ public class ChatFragment extends BaseFragment implements RefreshSwipeMenuListVi
                 content = "...[语音]";
                 break;
             case "video":
-                content = "...[video]";
+                content = "...[视频]";
                 break;
-            case "link":
-                content = messageBean.getUrl();
-                break;
+//            case "link":
+//                content = messageBean.getUrl();
+//                break;
         }
         conversation.setContent(content);
         conversation.setRoomid(messageBean.getRoomid());
@@ -350,7 +375,7 @@ public class ChatFragment extends BaseFragment implements RefreshSwipeMenuListVi
         DataSupport.findAllAsync(Conversation.class).listen(new FindMultiCallback() {
             @Override
             public <T> void onFinish(List<T> t) {
-                dataList= (List<Conversation>) t;
+                dataList = (List<Conversation>) t;
                 chatListAdapter.setData(dataList);
             }
         });
@@ -368,4 +393,29 @@ public class ChatFragment extends BaseFragment implements RefreshSwipeMenuListVi
             super.handleMessage(msg);
         }
     };
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
+    /**
+     * EventBus消息接收
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEventReceiver(MessageEvent messageEvent) {
+        String target = messageEvent.getTarget();
+        String behavior = messageEvent.getBehavior();
+        if (target.equals(Constants.TARGET_CHAT_FRAGMENT)) {
+            if (behavior.equals(Constants.MESSAGE_EVENT_HAS_MESSAGE)) {
+                ChatMessage item = messageEvent.getChatMessage();
+                receiveNewsMessage(item);
+            } else if (behavior.equals(Constants.MESSAGE_EVENT_INIT_CONVERSATION)) {
+                initChatInfo();
+            }
+
+        }
+    }
 }

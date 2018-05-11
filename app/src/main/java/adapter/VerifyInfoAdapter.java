@@ -1,5 +1,6 @@
 package adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -129,6 +130,9 @@ public class VerifyInfoAdapter extends BaseAdapter {
                         if (status == 200) {
                             mDatas.get(position).setStatus("STATUS_FRIEND_REQUEST_AGREE");
                             notifyDataSetChanged();
+                            Activity activity = (Activity) context;
+                            activity.setResult(1);
+                            activity.finish();
                         } else {
                             ToastUtils.getInstance().shortToast(message);
 

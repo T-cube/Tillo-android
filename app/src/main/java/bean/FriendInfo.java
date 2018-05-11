@@ -62,7 +62,7 @@ public class FriendInfo extends DataSupport implements Serializable {
         if (TextUtils.isEmpty(pinyin)) {
             this.pinyin = PinYinUtils.getPinyin(showname);
         }
-        headerWord = pinyin.substring(0, 1);
+        headerWord = pinyin.substring(0, 1).toUpperCase();
         return headerWord;
     }
 

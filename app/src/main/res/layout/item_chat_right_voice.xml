@@ -21,48 +21,57 @@
 
     <LinearLayout
         android:id="@+id/item_chat_right_voice_ll_content"
-        android:layout_width="170dp"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:layout_gravity="right"
         android:layout_marginRight="15dp"
+        android:layout_marginTop="20dp"
         android:background="@drawable/chat_bg_right"
         android:orientation="vertical">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:gravity="center"
             android:orientation="horizontal">
 
-            <ImageView
+            <TextView
+                android:id="@+id/item_chat_txt_right_duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="12dp"
-                android:layout_marginTop="5dp"
-                android:src="@drawable/chat_voice" />
+                android:textColor="@color/colorBlack"
+                android:textSize="15sp" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="vertical">
+            <RelativeLayout
+                android:layout_width="60dp"
+                android:layout_height="match_parent">
 
-                <SeekBar
-                    android:id="@+id/item_chat_right_voice_sb_seekbar"
-                    android:layout_width="120dp"
-                    android:layout_height="30dp"
-                    android:layout_marginTop="15dp" />
+                <ImageView
+                    android:id="@+id/item_chat_voice_right_plays"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:layout_centerInParent="true"
+                    android:padding="10dp"
+                    android:src="@drawable/play" />
 
-                <TextView
-                    android:id="@+id/itme_chat_right_voice_tv_duration"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="12dp"
-                    android:text="123 "
-                    android:textColor="#b0afaf"
-                    android:textSize="11sp" />
-            </LinearLayout>
+                <ProgressBar
+                    android:id="@+id/item_chat_voice_right_progress"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_centerInParent="true"
+                    android:visibility="invisible" />
+
+                <ImageView
+                    android:id="@+id/item_chat_voice_right_stop"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:layout_centerInParent="true"
+                    android:padding="10dp"
+                    android:src="@drawable/stop"
+                    android:visibility="gone" />
+            </RelativeLayout>
+
+
         </LinearLayout>
 
         <TextView

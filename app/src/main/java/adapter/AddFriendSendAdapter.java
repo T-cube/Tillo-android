@@ -125,7 +125,6 @@ public class AddFriendSendAdapter extends RecyclerView.Adapter<AddFriendSendAdap
                     @Override
                     public void onError(Response<String> response) {
                         super.onError(response);
-                        Log.e("TAG", response.body() + "code:" + response.code());
                     }
                 });
 
