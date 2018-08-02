@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/item_chat_txt_right_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/white_corner_bg"
+        android:gravity="center"
+        android:minWidth="55dp"
+        android:padding="5dp"
+        android:text="今天"
+        android:textColor="#b0afaf"
+        android:textSize="10sp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/item_chat_civ_head"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:src="@drawable/head" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/item_chat_txt_left_name"
+                android:layout_width="wrap_content"
+                android:textColor="#ff666666"
+                android:textSize="9sp"
+                android:layout_marginLeft="6dp"
+                android:layout_height="wrap_content" />
+            <views.RCRelativeLayout
+                android:id="@+id/item_chat_image_rc_contentrl"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="6dp"
+                app:round_corner_top_left="15dp">
+
+                <views.ProcessImageView
+                    android:id="@+id/item_chat_image_piv_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="left"
+                    android:scaleType="fitXY" />
+            </views.RCRelativeLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="150dp"
+        android:layout_height="22dp"
+        android:layout_marginLeft="70dp"
+        android:background="@color/white"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/item_chat_img_tv_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:text="11:30PM"
+            android:textColor="#b0afaf"
+            android:textSize="10sp" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="10dp" />
+</LinearLayout>

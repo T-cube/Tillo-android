@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Display;
@@ -23,6 +24,7 @@ import com.bumptech.glide.Glide;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.model.Response;
+import com.yumeng.tillo.FriendVerifyActivity;
 import com.yumeng.tillo.R;
 
 import java.util.List;
@@ -76,7 +78,10 @@ public class AddFriendSendAdapter extends RecyclerView.Adapter<AddFriendSendAdap
             @Override
             public void onClick(View v) {
                 //发送添加好友请求
-                initMarkDialog(bean.get_id());
+//                initMarkDialog(bean.get_id());
+                Intent friendVerify = new Intent(mContext, FriendVerifyActivity.class);
+                friendVerify.putExtra("_id", bean.get_id());
+                mContext.startActivity(friendVerify);
             }
         });
     }
@@ -99,7 +104,7 @@ public class AddFriendSendAdapter extends RecyclerView.Adapter<AddFriendSendAdap
             headCiv = Utils.findViewsById(itemView, R.id.item_search_civ_head);
             nickTv = Utils.findViewsById(itemView, R.id.item_search_tv_nick);
             phoneTv = Utils.findViewsById(itemView, R.id.item_search_tv_phone);
-            addFriendTv = Utils.findViewsById(itemView, R.id.item_search_tv_add);
+            addFriendTv = Utils.findViewsById(itemView, R.id.item_search_bt_add);
         }
     }
 

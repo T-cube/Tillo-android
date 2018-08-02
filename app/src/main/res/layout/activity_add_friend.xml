@@ -8,54 +8,69 @@
     tools:context=".AddFriendActivity">
 
     <LinearLayout
+        android:id="@+id/add_friend_ll_top"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_height="50dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="10dp"
-            android:onClick="backClick"
-            android:src="@drawable/back" />
-        <!--搜索框-->
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="43dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:background="@drawable/search_view_shape"
+            android:id="@+id/search_ll_search"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:background="@drawable/search_view_shape_2"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
-
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="16dp"
+                android:layout_height="15dp"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="10dp"
-                android:src="@drawable/search" />
+                android:src="@drawable/search_icon" />
 
             <EditText
                 android:id="@+id/addfd_et_input"
                 android:layout_width="match_parent"
-                android:layout_height="36dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="10dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="6dp"
                 android:background="@null"
+                android:hint="搜索"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
-                android:padding="2dp"
-                android:textColor="@color/colorBlack"
-                android:textSize="14sp" />
+                android:textColor="#ff333333"
+                android:textColorHint="#ff333333"
+                android:textSize="13sp" />
         </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="9dp"
+            android:layout_marginRight="15dp"
+            android:onClick="backClick"
+            android:text="取消"
+            android:textColor="#ff518fff"
+            android:textSize="15sp" />
     </LinearLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/addfd_rv_list"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></android.support.v7.widget.RecyclerView>
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/addfd_rv_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"></android.support.v7.widget.RecyclerView>
+
+        <include
+            android:id="@+id/addfd_ll_empty"
+            layout="@layout/add_friend_empty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+    </RelativeLayout>
 
 </LinearLayout>

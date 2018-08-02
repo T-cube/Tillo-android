@@ -19,7 +19,7 @@ public class UserInfo implements Serializable {
     private String mobile;
     private String name;
     private String sex;
-
+    private String address;
     public String getMobile() {
         return mobile;
     }
@@ -114,5 +114,13 @@ public class UserInfo implements Serializable {
 
     public void setToken_type(String token_type) {
         this.token_type = token_type;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

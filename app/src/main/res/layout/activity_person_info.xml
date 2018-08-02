@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.yumeng.tillo.PersonInfoActivity">
+
+    <include layout="@layout/titlebar_info" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:background="#FFF8F8F8" />
+
+    <LinearLayout
+        android:id="@+id/info_ll_head"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="头像"
+            android:textColor="#ff000000"
+            android:textSize="15sp" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/info_civ_head"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/head" />
+
+        <ImageView
+            android:layout_width="6dp"
+            android:layout_height="11dp"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/arrow_info" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:background="#ffe5e5e5" />
+
+    <LinearLayout
+        android:id="@+id/info_ll_name"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="昵称"
+            android:textColor="#ff000000"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/info_tv_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:textColor="#ff999999"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="19dp"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/arrow_info" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:background="#ffe5e5e5" />
+
+    <LinearLayout
+        android:id="@+id/info_ll_sex"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="性别"
+            android:textColor="#ff000000"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/info_tv_sex"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:textColor="#ff999999"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="19dp"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/arrow_info" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:background="#ffe5e5e5" />
+
+    <LinearLayout
+        android:id="@+id/info_ll_phone"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="电话"
+            android:textColor="#ff000000"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/info_tv_phone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:textColor="#ff999999"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:layout_width="6dp"
+            android:layout_height="11dp"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/arrow_info" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:background="#ffe5e5e5" />
+
+    <LinearLayout
+        android:id="@+id/info_ll_describe"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="51dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="个性签名"
+            android:textColor="#ff000000"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/info_tv_describe"
+            android:layout_width="wrap_content"
+            android:maxWidth="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:textColor="#ff999999"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:layout_width="6dp"
+            android:layout_height="11dp"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/arrow_info" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="15dp"
+        android:background="#FFF8F8F8" />
+
+    <LinearLayout
+        android:id="@+id/info_ll_address"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="地址"
+            android:textColor="#ff000000"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/info_tv_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:textColor="#ff999999"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:layout_width="6dp"
+            android:layout_height="11dp"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/arrow_info" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFF8F8F8" />
+</LinearLayout>

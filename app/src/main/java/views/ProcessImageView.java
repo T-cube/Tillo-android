@@ -59,8 +59,10 @@ public class ProcessImageView extends ImageView {
         mPaint.setStrokeWidth(2);
         Rect rect = new Rect();
         mPaint.getTextBounds("100%", 0, "100%".length(), rect);// 确定文字的宽度
-        canvas.drawText(progress + "%", getWidth() / 2 - rect.width() / 2,
-                getHeight() / 2, mPaint);
+        if (progress < 100) {
+            canvas.drawText(progress + "%", getWidth() / 2 - rect.width() / 2,
+                    getHeight() / 2, mPaint);
+        }
 
     }
 
@@ -68,6 +70,5 @@ public class ProcessImageView extends ImageView {
         this.progress = progress;
         postInvalidate();
     }
-    ;
 
 }

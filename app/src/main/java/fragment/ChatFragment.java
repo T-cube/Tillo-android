@@ -6,6 +6,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -21,8 +26,12 @@ import com.hankkin.library.RefreshSwipeMenuListView;
 import com.hankkin.library.SwipeMenu;
 import com.hankkin.library.SwipeMenuCreator;
 import com.hankkin.library.SwipeMenuItem;
+import com.lzy.okgo.OkGo;
+import com.lzy.okgo.callback.StringCallback;
+import com.lzy.okgo.model.Response;
 import com.yumeng.tillo.AddFriendActivity;
 import com.yumeng.tillo.ChatActivity;
+import com.yumeng.tillo.ChooseLinkmanActivity;
 import com.yumeng.tillo.MainActivity;
 import com.yumeng.tillo.R;
 
@@ -33,7 +42,10 @@ import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
 import org.litepal.crud.callback.FindMultiCallback;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import adapter.ChatListAdapter;
@@ -44,6 +56,7 @@ import bean.ChatMessage;
 import bean.ChatUserBean;
 import bean.Conversation;
 import bean.FriendInfo;
+import bean.Group;
 import bean.MessageEvent;
 import bean.UserInfo;
 import constants.Constants;
@@ -59,16 +72,24 @@ import utils.Utils;
  * tab:对话
  */
 
-public class ChatFragment extends BaseFragment implements RefreshSwipeMenuListView.OnRefreshListener {
-    private List<Conversation> dataList = new ArrayList<>();
-    private ChatListAdapter chatListAdapter;
+public class ChatFragment extends BaseFragment {
+    //    private List<Conversation> dataList = new ArrayList<>();
+//        private ChatListAdapter chatListAdapter;
     //消息列表
-    private RefreshSwipeMenuListView rsmLv;
-    //通讯录、极速模式、更多
-    private ImageView addressBookIv, fastModeIv, moreIv;
+//    private RefreshSwipeMenuListView rsmLv;
     //搜索框
-    private int position;
+//    private int position;
     private UserInfo userInfo;
+    //声明控件
+    TabLayout mTabLayout;
+    ViewPager mViewPager;
+    private ArrayList<Fragment> fragments = new ArrayList<>();
+    private String titles[] = new String[]{
+            "消息", "群聊", "语音"
+    };
+    String groupId = "";
+    private List<FriendInfo> mList = new ArrayList<>();
+    private ImageView addIv;
 
     @Override
     protected int getLayoutId() {
@@ -77,94 +98,101 @@ public class ChatFragment extends BaseFragment implements RefreshSwipeMenuListVi
 
     @Override
     protected void initView(View view, Bundle savedInstanceState) {
-        EventBus.getDefault().register(this);
+//        EventBus.getDefault().register(this);
         userInfo = AppSharePre.getPersonalInfo();
-        rsmLv = Utils.findViewsById(view, R.id.fragment_chat_rsmlv_listview);
-        addressBookIv = Utils.findViewsById(view, R.id.fragment_chat_iv_address_book);
-        fastModeIv = Utils.findViewsById(view, R.id.fragment_chat_iv_fast);
-        moreIv = Utils.findViewsById(view, R.id.fragment_chat_iv_more);
-        bindEvent();
-    }
-
-
-    public void bindEvent() {
-        chatListAdapter = new ChatListAdapter(MyApplication.getContext(), dataList);
-        rsmLv.setAdapter(chatListAdapter);
-        rsmLv.setListViewMode(RefreshSwipeMenuListView.HEADER);
-        rsmLv.setOnRefreshListener(this);
-        //左滑菜单
-        SwipeMenuCreator creator = new SwipeMenuCreator() {
-            @Override
-            public void create(SwipeMenu menu) {
-                // 创建滑动选项
-                SwipeMenuItem moreItem = new SwipeMenuItem(
-                        MyApplication.getContext());
-                // 设置选项背景
-                moreItem.setBackground(getResources().getDrawable(R.drawable.menu_corner_shape));
-                // 设置选项宽度
-                moreItem.setWidth(dp2px(80, MyApplication.getContext()));
-                // 设置选项标题
-                moreItem.setTitle("更多");
-                // 设置选项标题
-                moreItem.setTitleSize(15);
-                // 设置选项标题颜色
-                moreItem.setTitleColor(getResources().getColor(R.color.menu_text1));
-                // 添加选项
-                menu.addMenuItem(moreItem);
-                // 创建删除选项
-                SwipeMenuItem pigeonholeItem = new SwipeMenuItem(MyApplication.getContext());
-                pigeonholeItem.setBackground(getResources().getDrawable(R.drawable.menu_corner_blue_shape));
-                pigeonholeItem.setWidth(dp2px(80, MyApplication.getContext()));
-                pigeonholeItem.setTitle("归档");
-                pigeonholeItem.setTitleSize(15);
-                pigeonholeItem.setTitleColor(getResources().getColor(R.color.menu_text1));
-                menu.addMenuItem(pigeonholeItem);
-            }
-        };
-        rsmLv.setMenuCreator(creator);
-        rsmLv.setOnMenuItemClickListener(new RefreshSwipeMenuListView.OnMenuItemClickListener() {
-            @Override
-            public void onMenuItemClick(int position, SwipeMenu menu, int index) {
-                switch (index) {
-                    case 0: //第一个选项
-                        Toast.makeText(getActivity(), "更多", Toast.LENGTH_SHORT).show();
-                        break;
-                    case 1: //第二个选项
-//                        del(position, rsmLv.getChildAt(position + 1 - rsmLv.getFirstVisiblePosition()));
-                        break;
-
-                }
-            }
-        });
-        rsmLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                FriendInfo friendInfo = dataList.get(i - 1).getFriendInfo().get(0);
-                Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
-                chatIntent.putExtra("target", friendInfo.getFriend_id());
-                chatIntent.putExtra("userName", friendInfo.getShowname());
-                chatIntent.putExtra("roomId", friendInfo.getRoomid());
-                chatIntent.putExtra("avatar", friendInfo.getAvatar());
-                startActivity(chatIntent);
-
-            }
-        });
-
-
-        addressBookIv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MainActivity mainActivity = (MainActivity) getmActivity();
-                mainActivity.toggle();
-            }
-        });
-        moreIv.setOnClickListener(new View.OnClickListener() {
+        mTabLayout = myFindViewsById(R.id.chat_tl_tab);
+        mViewPager = myFindViewsById(R.id.chat_vp_pager);
+        initFragment();
+        MyFragmentPagerAdapter adapter = new MyFragmentPagerAdapter(getChildFragmentManager());
+        mViewPager.setAdapter(adapter);
+        mViewPager.setOffscreenPageLimit(4);
+        mTabLayout.setupWithViewPager(mViewPager);
+        mTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+        mTabLayout.setTabMode(TabLayout.MODE_FIXED);
+        EventBus.getDefault().register(this);
+        addIv = Utils.findViewsById(view, R.id.search_iv_add_friend);
+        addIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showReminder(moreIv);
+                showReminder(addIv);
             }
         });
+        getFriendList();
+//        rsmLv = Utils.findViewsById(view, R.id.fragment_chat_rsmlv_listview);
+//        bindEvent();
     }
+
+
+    //初始化fragment
+    public void initFragment() {
+        fragments.add(new MessageFragment());
+        fragments.add(new GroupFragment());
+        fragments.add(new CallFragment());
+    }
+
+
+//    public void bindEvent() {
+//        chatListAdapter = new ChatListAdapter(MyApplication.getContext(), dataList);
+//        rsmLv.setAdapter(chatListAdapter);
+//        rsmLv.setListViewMode(RefreshSwipeMenuListView.HEADER);
+//        rsmLv.setOnRefreshListener(this);
+//        //左滑菜单
+//        SwipeMenuCreator creator = new SwipeMenuCreator() {
+//            @Override
+//            public void create(SwipeMenu menu) {
+//                // 创建滑动选项
+//                SwipeMenuItem moreItem = new SwipeMenuItem(
+//                        MyApplication.getContext());
+//                // 设置选项背景
+//                moreItem.setBackground(getResources().getDrawable(R.drawable.menu_corner_shape));
+//                // 设置选项宽度
+//                moreItem.setWidth(dp2px(80, MyApplication.getContext()));
+//                // 设置选项标题
+//                moreItem.setTitle("更多");
+//                // 设置选项标题
+//                moreItem.setTitleSize(15);
+//                // 设置选项标题颜色
+//                moreItem.setTitleColor(getResources().getColor(R.color.menu_text1));
+//                // 添加选项
+//                menu.addMenuItem(moreItem);
+//                // 创建删除选项
+//                SwipeMenuItem pigeonholeItem = new SwipeMenuItem(MyApplication.getContext());
+//                pigeonholeItem.setBackground(getResources().getDrawable(R.drawable.menu_corner_blue_shape));
+//                pigeonholeItem.setWidth(dp2px(80, MyApplication.getContext()));
+//                pigeonholeItem.setTitle("归档");
+//                pigeonholeItem.setTitleSize(15);
+//                pigeonholeItem.setTitleColor(getResources().getColor(R.color.menu_text1));
+//                menu.addMenuItem(pigeonholeItem);
+//            }
+//        };
+//        rsmLv.setMenuCreator(creator);
+//        rsmLv.setOnMenuItemClickListener(new RefreshSwipeMenuListView.OnMenuItemClickListener() {
+//            @Override
+//            public void onMenuItemClick(int position, SwipeMenu menu, int index) {
+//                switch (index) {
+//                    case 0: //第一个选项
+//                        Toast.makeText(getActivity(), "更多", Toast.LENGTH_SHORT).show();
+//                        break;
+//                    case 1: //第二个选项
+////                        del(position, rsmLv.getChildAt(position + 1 - rsmLv.getFirstVisiblePosition()));
+//                        break;
+//
+//                }
+//            }
+//        });
+//        rsmLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+//                FriendInfo friendInfo = dataList.get(i - 1).getFriendInfo().get(0);
+//                Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
+//                chatIntent.putExtra("target", friendInfo.getFriend_id());
+//                chatIntent.putExtra("userName", friendInfo.getShowname());
+//                chatIntent.putExtra("roomId", friendInfo.getRoomid());
+//                chatIntent.putExtra("avatar", friendInfo.getAvatar());
+//                startActivity(chatIntent);
+//
+//            }
+//        });
 
     public void showReminder(View view) {
         if (popupWindow != null && popupWindow.isShowing()) return;
@@ -180,7 +208,9 @@ public class ChatFragment extends BaseFragment implements RefreshSwipeMenuListVi
             @Override
             public void onClick(View v) {
                 //发起群聊
-
+                Intent groupIntent = new Intent(getActivity(), ChooseLinkmanActivity.class);
+                groupIntent.putExtra("friendList", (Serializable) mList);
+                startActivity(groupIntent);
             }
         });
 
@@ -202,33 +232,33 @@ public class ChatFragment extends BaseFragment implements RefreshSwipeMenuListVi
         popupWindow.showAsDropDown(view, 0, 0);
     }
 
-    /**
-     * 下拉刷新
-     */
-    @Override
-    public void onRefresh() {
-        rsmLv.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                rsmLv.complete();
-            }
-        }, 300);
+//    /**
+//     * 下拉刷新
+//     */
+//    @Override
+//    public void onRefresh() {
+//        rsmLv.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                rsmLv.complete();
+//            }
+//        }, 300);
+//
+//    }
 
-    }
 
-
-    /**
-     * 加载更多
-     */
-    @Override
-    public void onLoadMore() {
-        rsmLv.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                rsmLv.complete();
-            }
-        }, 300);
-    }
+//    /**
+//     * 加载更多
+//     */
+//    @Override
+//    public void onLoadMore() {
+//        rsmLv.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                rsmLv.complete();
+//            }
+//        }, 300);
+//    }
 
     public int dp2px(int dp, Context context) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
@@ -236,155 +266,54 @@ public class ChatFragment extends BaseFragment implements RefreshSwipeMenuListVi
     }
 
 
-    /**
-     * 删除item动画
-     *
-     * @param index
-     * @param v
-     */
-    private void del(final int index, View v) {
-        final Animation animation = (Animation) AnimationUtils.loadAnimation(v.getContext(), R.anim.list_anim);
-        animation.setAnimationListener(new Animation.AnimationListener() {
-            public void onAnimationStart(Animation animation) {
-            }
-
-            public void onAnimationRepeat(Animation animation) {
-            }
-
-            public void onAnimationEnd(Animation animation) {
-                dataList.remove(index);
-                position = index;
-                chatListAdapter.notifyDataSetChanged();
-                animation.cancel();
-            }
-        });
-        v.startAnimation(animation);
-    }
+//    /**
+//     * 删除item动画
+//     *
+//     * @param index
+//     * @param v
+//     */
+//    private void del(final int index, View v) {
+//        final Animation animation = (Animation) AnimationUtils.loadAnimation(v.getContext(), R.anim.list_anim);
+//        animation.setAnimationListener(new Animation.AnimationListener() {
+//            public void onAnimationStart(Animation animation) {
+//            }
+//
+//            public void onAnimationRepeat(Animation animation) {
+//            }
+//
+//            public void onAnimationEnd(Animation animation) {
+//                dataList.remove(index);
+//                position = index;
+//                chatListAdapter.notifyDataSetChanged();
+//                animation.cancel();
+//            }
+//        });
+//        v.startAnimation(animation);
+//    }
 
 
     private CommonPopupWindow popupWindow;
 
-    //获取聊天信息
-    public void initChatInfo() {
-        PomeloClient client = PomeloService.getInstance().getClient();
-        JSONObject msg = new JSONObject();
-        client.request("account.accountHandler.initInfo", msg, new DataCallBack() {
-            @Override
-            public void responseData(JSONObject message) {
-                com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(message.toString());
-                List<ChatBean> messageList = JSON.parseArray(jsonObject.getString("data"), ChatBean.class);
-                //获取对话列表
-                if (messageList.size() > 0) {
-                    //加载首页消息数据
-                    dataList.addAll(getChatListData(messageList));
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            chatListAdapter.setData(dataList);
-                        }
-                    }, 300);
-                } else {
-
-
-                }
-            }
-        });
-
-    }
-
-    //获取对话列表数据
-    public List<Conversation> getChatListData(List<ChatBean> list) {
-        List<Conversation> tempList = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            Conversation conversation = new Conversation();
-            conversation.setRoomid(list.get(i).getMessage().getRoomid());
-            conversation.setTimestamp(list.get(i).getMessage().getTimestamp());
-            switch (list.get(i).getMessage().getType()) {
-                case "text":
-                    conversation.setContent(list.get(i).getMessage().getContent());
-                    break;
-                case "image":
-                    conversation.setContent("...[图片]");
-                    break;
-                case "audio":
-                    conversation.setContent("...[语音]");
-                    break;
-                case "file":
-                    conversation.setContent("...[文件]");
-                    break;
-                case "video":
-                    conversation.setContent("...[视频]");
-                    break;
-//                case "link":
-//                    conversation.setContent();
-//                    break;
-            }
-            conversation.saveOrUpdate("roomid=?", list.get(i).getMessage().getRoomid());
-            tempList.add(conversation);
+    //适配器
+    class MyFragmentPagerAdapter extends FragmentStatePagerAdapter {
+        public MyFragmentPagerAdapter(FragmentManager fm) {
+            super(fm);
         }
-        return tempList;
-    }
 
-    //收到新消息
-    public void receiveNewsMessage(ChatMessage messageBean) {
-        List<Conversation> tempList = DataSupport.where("roomid=?", messageBean.getRoomid())
-                .find(Conversation.class);
-        Conversation conversation = new Conversation();
-        Activity currentActivity = MyApplication.getCurrentActivity();
-        int unreadTemp = 0;
-        if (tempList == null) {
-            unreadTemp = 1;
-        } else if (tempList.size() == 1) {
-            //已存在的会话
-            unreadTemp = conversation.getUnread() + 1;
+        @Override
+        public Fragment getItem(int position) {
+            return fragments.get(position);
         }
-        //不存在的会话
-        if (currentActivity instanceof MainActivity) {
-            conversation.setUnread(unreadTemp);
-            messageBean.save();
-        } else if (currentActivity instanceof ChatActivity) {
-            //聊天界面不是 对应的消息会话界面
-            if (!((ChatActivity) currentActivity).getRoomId().equals(messageBean.getRoomid()))
-                conversation.setUnread(unreadTemp);
+
+        @Override
+        public int getCount() {
+            return titles.length;
         }
-        String content = "";
-        switch (messageBean.getType()) {
-            case "text":
-                content = messageBean.getContent();
-                break;
-            case "image":
-                content = "...[图片]";
-                break;
-            case "file":
-                content = "...[文件]";
-                break;
-            case "audio":
-                content = "...[语音]";
-                break;
-            case "video":
-                content = "...[视频]";
-                break;
-//            case "link":
-//                content = messageBean.getUrl();
-//                break;
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return titles[position];
         }
-        conversation.setContent(content);
-        conversation.setRoomid(messageBean.getRoomid());
-        conversation.setTimestamp(messageBean.getTimestamp());
-        conversation.saveOrUpdate("roomid=?", messageBean.getRoomid());
-        DataSupport.findAllAsync(Conversation.class).listen(new FindMultiCallback() {
-            @Override
-            public <T> void onFinish(List<T> t) {
-                dataList = (List<Conversation>) t;
-                chatListAdapter.setData(dataList);
-            }
-        });
-//        handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                chatListAdapter.setData(dataList);
-//            }
-//        }, 500);
     }
 
     public Handler handler = new Handler() {
@@ -393,7 +322,108 @@ public class ChatFragment extends BaseFragment implements RefreshSwipeMenuListVi
             super.handleMessage(msg);
         }
     };
+    //获取好友列表
+    public void getFriendList() {
+        OkGo.<String>get(Constants.TSHION_URL + Constants.getFriendList)
+                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
+                .execute(new StringCallback() {
+                    @Override
+                    public void onSuccess(Response<String> response) {
+                        com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(response.body());
+                        String message = jsonObject.getString("message");
+                        int status = jsonObject.getIntValue("status");
+                        if (status == 200) {
+                            //获取好友列表
+                            mList = JSON.parseArray(jsonObject.getString("data"), FriendInfo.class);
+                            //对集合排序
+                            Collections.sort(mList, new Comparator<FriendInfo>() {
+                                @Override
+                                public int compare(FriendInfo lhs, FriendInfo rhs) {
+                                    //根据拼音进行排序
+                                    return lhs.getPinyin().compareTo(rhs.getPinyin().toUpperCase());
+                                }
+                            });
 
+                        } else {
+                            ToastUtils.getInstance().shortToast(message);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<String> response) {
+                        super.onError(response);
+                    }
+                });
+    }
+
+
+
+//
+//    //获取好友列表
+//    public void getFriendList() {
+//        OkGo.<String>get(Constants.TSHION_URL + Constants.getFriendList + userInfo.getUid())
+//                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
+//                .execute(new StringCallback() {
+//                    @Override
+//                    public void onSuccess(Response<String> response) {
+//                        com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(response.body());
+//                        String message = jsonObject.getString("message");
+//                        int status = jsonObject.getIntValue("status");
+//                        com.alibaba.fastjson.JSONObject dataJson = jsonObject.getJSONObject("data");
+//                        if (status == 200) {
+//                            List<Group> groups = JSON.parseArray(dataJson.getString("groups"), Group.class);
+//                            if (groups.size() > 0) {
+//                                groupId = groups.get(0).get_id();
+//                                getGroupInfo();
+//                            }
+//                        } else {
+//                            ToastUtils.getInstance().shortToast(message);
+//                        }
+//
+//                    }
+//
+//                    @Override
+//                    public void onError(Response<String> response) {
+//                        super.onError(response);
+//                    }
+//                });
+//    }
+
+//    //获取组信息
+//    public void getGroupInfo() {
+//        OkGo.<String>get(Constants.TSHION_URL + Constants.getGroup + userInfo.getUid() + "/" + groupId)
+//                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
+//                .execute(new StringCallback() {
+//                    @Override
+//                    public void onSuccess(Response<String> response) {
+//                        com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(response.body());
+//                        String message = jsonObject.getString("message");
+//                        int status = jsonObject.getIntValue("status");
+//                        if (status == 200) {
+//                            //获取好友列表
+//                            mList = JSON.parseArray(jsonObject.getString("data"), FriendInfo.class);
+//                            //对集合排序
+//                            Collections.sort(mList, new Comparator<FriendInfo>() {
+//                                @Override
+//                                public int compare(FriendInfo lhs, FriendInfo rhs) {
+//                                    //根据拼音进行排序
+//                                    return lhs.getPinyin().compareTo(rhs.getPinyin().toUpperCase());
+//                                }
+//                            });
+//
+//                        } else {
+//                            ToastUtils.getInstance().shortToast(message);
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onError(Response<String> response) {
+//                        super.onError(response);
+//                    }
+//                });
+//
+//
+//    }
 
     @Override
     public void onDestroy() {
@@ -408,14 +438,9 @@ public class ChatFragment extends BaseFragment implements RefreshSwipeMenuListVi
     public void onMessageEventReceiver(MessageEvent messageEvent) {
         String target = messageEvent.getTarget();
         String behavior = messageEvent.getBehavior();
-        if (target.equals(Constants.TARGET_CHAT_FRAGMENT)) {
-            if (behavior.equals(Constants.MESSAGE_EVENT_HAS_MESSAGE)) {
-                ChatMessage item = messageEvent.getChatMessage();
-                receiveNewsMessage(item);
-            } else if (behavior.equals(Constants.MESSAGE_EVENT_INIT_CONVERSATION)) {
-                initChatInfo();
-            }
-
+        if (target.equals(Constants.TARGET_MAIN_ACTIVITY)) {
+            if (behavior.equals(Constants.MESSAGE_EVENT_FRIEND_AGREE))
+                getFriendList();
         }
     }
 }

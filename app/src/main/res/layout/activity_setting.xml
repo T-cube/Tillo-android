@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical"
+    tools:context="com.yumeng.tillo.SettingActivity">
+
+    <include layout="@layout/titlebar_info" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:background="#FFF8F8F8" />
+
+    <LinearLayout
+        android:id="@+id/setting_ll_setting"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="账号设置"
+            android:textColor="#ff000000"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:layout_width="6dp"
+            android:layout_height="11dp"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/arrow_info" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="15dp"
+        android:background="#ffe5e5e5" />
+    <LinearLayout
+        android:id="@+id/setting_ll_blacklist"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="黑名单"
+            android:textColor="#ff000000"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:layout_width="6dp"
+            android:layout_height="11dp"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/arrow_info" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="15dp"
+        android:background="#ffe5e5e5" />
+    <LinearLayout
+        android:id="@+id/setting_ll_clear"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="清理空间"
+            android:textColor="#ff000000"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:layout_width="6dp"
+            android:layout_height="11dp"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/arrow_info" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="15dp"
+        android:background="#ffe5e5e5" />
+
+    <LinearLayout
+        android:id="@+id/setting_ll_about"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="关于tillo"
+            android:textColor="#ff000000"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:layout_width="6dp"
+            android:layout_height="11dp"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/arrow_info" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="15dp"
+        android:background="#FFF8F8F8" />
+
+    <TextView
+        android:id="@+id/setting_tv_logout"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="@color/white"
+        android:text="退出登录"
+        android:gravity="center"
+        android:textColor="#ffff6379"
+        android:textSize="15sp" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFF8F8F8"/>
+</LinearLayout>

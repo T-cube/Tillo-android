@@ -6,67 +6,77 @@
     android:orientation="vertical"
     tools:context=".ChatActivity">
 
-    <include
-        layout="@layout/action_bar"
+    <RelativeLayout
+        android:id="@+id/chat_rl_back"
         android:layout_width="match_parent"
-        android:layout_height="48dp" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="44dp">
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_width="58dp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:onClick="onBackClicked"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="12dp"
+                android:layout_height="19dp"
+                android:layout_marginLeft="12dp"
+                android:src="@drawable/arrow_back" />
 
             <TextView
-                android:id="@+id/chat_tv_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:text="用户昵称"
-                android:textColor="#404040"
-                android:textSize="22sp" />
-
-            <TextView
-                android:id="@+id/chat_tv_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="2dp"
-                android:text="最近登录：星期四 12:59PM"
-                android:textSize="11sp" />
+                android:layout_marginLeft="4dp"
+                android:text="首页"
+                android:textColor="#ff518fff"
+                android:textSize="15sp" />
         </LinearLayout>
 
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:padding="5dp"
-            android:src="@drawable/call" />
+        <TextView
+            android:id="@+id/chat_tv_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textColor="#ff333333"
+            android:textSize="18sp" />
 
         <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:padding="5dp"
-            android:src="@drawable/video" />
+            android:id="@+id/chat_iv_detail"
+            android:layout_width="5dp"
+            android:layout_height="9dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="6dp"
+            android:layout_toRightOf="@id/chat_tv_name"
+            android:src="@drawable/arrow_right2" />
 
         <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:padding="5dp"
-            android:src="@drawable/upload" />
+            android:id="@+id/chat_iv_video"
+            android:layout_width="23dp"
+            android:layout_height="19dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="16dp"
+            android:src="@drawable/video_icon" />
 
-    </LinearLayout>
+        <ImageView
+            android:id="@+id/chat_iv_voice"
+            android:layout_width="23dp"
+            android:layout_height="19dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="16dp"
+            android:layout_toLeftOf="@id/chat_iv_video"
+            android:src="@drawable/voice_icon" />
+    </RelativeLayout>
+
 
     <com.scwang.smartrefresh.layout.SmartRefreshLayout
         android:id="@+id/chat_srl_refresh"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="5dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:background="#FFF5F5F5">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/chat_rv_list"
@@ -77,40 +87,113 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="100dp"
+        android:background="@color/white"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginLeft="15dp"
-            android:padding="5dp"
-            android:src="@drawable/take_photo" />
+        android:orientation="vertical">
 
         <EditText
             android:id="@+id/chat_et_input"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_weight="1"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:background="@color/white"
             android:imeActionLabel="发送"
             android:imeOptions="actionSend"
             android:inputType="text" />
 
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginLeft="5dp"
-            android:padding="5dp"
-            android:src="@drawable/emoji" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:background="#ffcccccc" />
 
-        <views.AudioRecorderButton
-            android:id="@+id/chat_arb_voice"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="10dp"
-            android:background="@drawable/voice"
-            android:padding="5dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/chat_iv_more"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:src="@drawable/more_icon" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/chat_iv_album"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:src="@drawable/album_icon" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/chat_iv_camera"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:src="@drawable/camera_icon" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/chat_iv_emoji"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:src="@drawable/emoji_icon" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <views.AudioRecorderButton
+                    android:id="@+id/chat_arb_voice"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:background="@drawable/mic_icon"
+                    android:padding="5dp" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
+    <!--emoji表情面板-->
+    <FrameLayout
+        android:id="@+id/chat_fl_emoji"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
 </LinearLayout>

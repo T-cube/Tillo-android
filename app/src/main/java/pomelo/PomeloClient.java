@@ -27,6 +27,14 @@ public class PomeloClient {
     private Map<Integer, DataCallBack> cbs;
     private Map<String, List<DataListener>> listeners;
 
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public void setSocket(Socket socket) {
+        this.socket = socket;
+    }
+
     public PomeloClient(String url, int port) {
         initSocket(url, port);
         cbs = new HashMap<Integer, DataCallBack>();
@@ -188,7 +196,8 @@ public class PomeloClient {
      * Disconnect the connection with the server.
      */
     public void disconnect() {
-        socket.disconnect();
+        if (socket != null)
+            socket.disconnect();
     }
 
     /**

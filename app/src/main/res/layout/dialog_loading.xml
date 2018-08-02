@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="150dp"
+    android:layout_height="150dp"
+    android:background="@drawable/dia_loading_bg"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="16.0dip">
+
+    <ProgressBar
+        android:id="@+id/dialog_pb_loading"
+        android:layout_width="40dp"
+        android:layout_height="40dp" />
+
+    <TextView
+        android:id="@+id/dialog_tv_tips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8.0dip"
+        android:textColor="@color/white"
+        android:textSize="16.0dip" />
+
+</LinearLayout>

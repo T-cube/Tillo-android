@@ -31,27 +31,29 @@
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/item_chat_civ_head"
             android:layout_width="50dp"
+            android:src="@drawable/head"
             android:layout_height="50dp" />
 
         <views.RCRelativeLayout
+            android:id="@+id/item_chat_image_rc_contentrl"
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:layout_marginLeft="5dp"
             app:round_corner_top_left="15dp">
 
-            <ImageView
-                android:id="@+id/item_chat_img_iv_image"
+            <views.ProcessImageView
+                android:id="@+id/item_chat_image_piv_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:src="@drawable/head" />
+                android:scaleType="fitXY"
+                android:layout_gravity="left" />
         </views.RCRelativeLayout>
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="150dp"
         android:layout_height="22dp"
-        android:layout_marginLeft="15dp"
+        android:layout_marginLeft="70dp"
         android:background="@color/white"
         android:orientation="horizontal">
 
@@ -67,5 +69,7 @@
             android:textColor="#b0afaf"
             android:textSize="10sp" />
     </LinearLayout>
-
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="10dp" />
 </LinearLayout>

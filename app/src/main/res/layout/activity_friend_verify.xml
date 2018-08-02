@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#fff8f8f8"
+    tools:context="com.yumeng.tillo.FriendVerifyActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:background="@color/white">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:onClick="backClick"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="9dp"
+                android:layout_height="16dp"
+                android:layout_marginLeft="15dp"
+                android:src="@drawable/arrow_back" />
+
+            <TextView
+                android:id="@+id/friend_verify_tv_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="6dp"
+                android:text="返回"
+                android:textColor="#ff518fff"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/friend_verify_tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="验证信息"
+            android:textColor="#ff333333"
+            android:textSize="18sp" />
+
+        <RelativeLayout
+            android:id="@+id/friend_verify_rl_send"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentRight="true">
+
+            <TextView
+                android:id="@+id/friend_verify_tv_send"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="发送"
+                android:onClick="sendFriendRequest"
+                android:textColor="#ff518fff"
+                android:textSize="15sp" />
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#ffcccccc" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="31dp"
+        android:background="#fff8f8f8"
+        android:gravity="center_vertical"
+        android:paddingLeft="15dp"
+        android:text="对方需要你填写验证信息"
+        android:textColor="#ff999999"
+        android:textSize="12sp" />
+    <EditText
+        android:id="@+id/friend_verify_et_input"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="@color/white"
+        android:paddingLeft="15dp"
+        android:singleLine="true"
+        android:textColor="#ff000000"
+        android:textSize="15sp"
+        android:paddingRight="15dp"/>
+
+</LinearLayout>

@@ -45,10 +45,7 @@ public class FriendInfo extends DataSupport implements Serializable {
         this.friend_id = friend_id;
     }
 
-    public String getPinyin() {
-        this.pinyin = PinYinUtils.getPinyin(showname);
-        return pinyin;
-    }
+
 
     public String getName() {
         return name;
@@ -65,7 +62,10 @@ public class FriendInfo extends DataSupport implements Serializable {
         headerWord = pinyin.substring(0, 1).toUpperCase();
         return headerWord;
     }
-
+    public String getPinyin() {
+        this.pinyin = PinYinUtils.getPinyin(showname);
+        return pinyin;
+    }
     public void setPinyin(String pinyin) {
         this.pinyin = pinyin;
     }

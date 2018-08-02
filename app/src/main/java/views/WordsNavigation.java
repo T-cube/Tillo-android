@@ -20,7 +20,7 @@ import android.view.View;
 public class WordsNavigation extends View {
 
     /*绘制的列表导航字母*/
-    private String words[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
+    private String words[] = {"🔍","A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
             "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "#"};
     /*字母画笔*/
     private Paint wordsPaint;
@@ -65,7 +65,7 @@ public class WordsNavigation extends View {
         itemWidth = getMeasuredWidth();
         //使得边距好看一些
         int height = getMeasuredHeight() - 10;
-        itemHeight = height / 27;
+        itemHeight = height / 30;
     }
 
     @Override

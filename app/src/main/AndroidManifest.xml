@@ -61,7 +61,32 @@
 
         <activity android:name=".SetNickNameActivity" />
         <activity android:name=".CameraSelectorActivity" />
-        <activity android:name=".NationCodeActivity"></activity>
+        <activity android:name=".NationCodeActivity" />
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.yumeng.tillo.fileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <activity android:name=".PersonInfoActivity" />
+        <activity android:name=".SettingActivity" />
+        <activity android:name=".FriendVerifyActivity" />
+        <activity android:name=".FriendInfoActivity" />
+        <activity android:name=".AlertInfoActivity" />
+        <activity android:name=".AlertSexActivity" />
+        <activity android:name=".AlertRemarkActivity" />
+        <activity android:name=".ChooseLinkmanActivity" />
+        <activity android:name=".GroupChatActivity" />
+        <activity android:name=".GroupSettingActivity" />
+        <activity android:name=".AddMemberActivity" />
+        <activity android:name=".AlertGroupNameActivity" />
+        <activity android:name=".GroupListActivity" />
+        <activity android:name=".RegisterSuccessActivity"></activity>
     </application>
 
 </manifest>

@@ -75,14 +75,19 @@ public class AudioManager {
             mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
             //设置音频的格式为amr
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            mMediaRecorder.prepare();
+            try {
+                mMediaRecorder.prepare();
+            } catch (IOException e) {
+                Log.e("PrepareError", "prepare() failed");
+            }
+
             mMediaRecorder.start();
             //准备结束
             isPrepared = true;
             if (mListener != null) {
                 mListener.wellPrepared();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

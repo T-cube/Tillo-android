@@ -1,21 +1,32 @@
 package base;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
+
+import com.yumeng.tillo.R;
+
+import java.util.List;
 
 import bean.UserInfo;
 import utils.AppSharePre;
+import utils.StatusBarUtil;
 
 
 public abstract class BaseActivity extends AppCompatActivity {
     protected FragmentManager fragmentManager;
     protected Context mContext;
     protected UserInfo loginuser;
+    //用来控制应用前后台切换的逻辑
+    private boolean isCurrentRunningForeground = true;
+    protected boolean isOpenCamera = false;
 
     abstract protected void initView();
 
@@ -28,6 +39,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         // 设置所有Activity禁止横屏展示
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//        StatusBarUtil.setColor(this, getResources().getColor(R.color.white), 0);
 //        StatusBarUtil.setColor(this, ContextCompat.getColor(this, R.color.transparent_black), 0);
 //        StatusBarUtil.setTranslucent(this,50);
     }
@@ -115,7 +127,7 @@ public abstract class BaseActivity extends AppCompatActivity {
      */
     public void finish(int exitAnim) {
         finish();
-        overridePendingTransition(0, exitAnim);
+//        overridePendingTransition(0, exitAnim);
     }
 
     /**
@@ -140,6 +152,50 @@ public abstract class BaseActivity extends AppCompatActivity {
      */
     public void onDisconnect() {
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!isCurrentRunningForeground) {
+            Log.d("Base", ">>>>>>>>>>>>>>>>>>>切到前台 activity process");
+        }
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isCurrentRunningForeground = isRunningForeground();
+        if (!isCurrentRunningForeground) {
+            Log.d("Base", ">>>>>>>>>>>>>>>>>>>切到后台 activity process");
+            if (!isOpenCamera) {
+                //拍照
+                Log.d("Base", ">>>>>>>>>>>>>>>>>>>不打开相机");
+            } else {
+                Log.d("Base", ">>>>>>>>>>>>>>>>>>>打开了相机");
+            }
+
+        }
+
+    }
+
+    public boolean isRunningForeground() {
+        ActivityManager activityManager = (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> appProcessInfos = activityManager.getRunningAppProcesses();
+        Log.d("Base", "appSize:" + appProcessInfos.size());
+        // 枚举进程
+        for (ActivityManager.RunningAppProcessInfo appProcessInfo : appProcessInfos) {
+            Log.d("Base", appProcessInfo.importance + "");
+            if (appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                if (appProcessInfo.processName.equals(this.getApplicationInfo().processName)) {
+//                    Log.d("Base", "EntryActivity isRunningForeGround");
+                    return true;
+                }
+            }
+        }
+//        Log.d("Base", "EntryActivity isRunningBackGround");
+        return false;
     }
 
 }

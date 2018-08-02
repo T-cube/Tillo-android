@@ -1,5 +1,7 @@
 package bean;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import java.io.Serializable;
 
 /**
@@ -7,15 +9,25 @@ import java.io.Serializable;
  */
 
 public class ChatBean implements Serializable {
-    private RoomBean room;
+    private Member member;
     private ChatMessage message;
+    @JSONField(name = "_offline_count")
+    private int unread;//未读消息数
 
-    public RoomBean getRoom() {
-        return room;
+    public int getUnread() {
+        return unread;
     }
 
-    public void setRoom(RoomBean room) {
-        this.room = room;
+    public void setUnread(int unread) {
+        this.unread = unread;
+    }
+
+    public Member getMember() {
+        return member;
+    }
+
+    public void setMember(Member member) {
+        this.member = member;
     }
 
     public ChatMessage getMessage() {

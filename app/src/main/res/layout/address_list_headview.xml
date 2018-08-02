@@ -2,69 +2,131 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="85dp"
+    android:layout_height="183dp"
     android:orientation="vertical">
 
-    <RelativeLayout
+    <LinearLayout
+        android:id="@+id/headview_ll_add_friend"
         android:layout_width="match_parent"
-        android:layout_marginTop="5dp"
-        android:layout_height="match_parent">
+        android:layout_height="52dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="21dp"
+            android:layout_marginLeft="22dp"
+            android:src="@drawable/new_firend_icon" />
+
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginRight="10dp">
+            android:layout_marginLeft="22dp"
+            android:layout_marginRight="22dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-            <android.support.v7.widget.CardView
-                android:id="@+id/address_list_cv_card"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="新朋友"
+                android:textColor="#ff333333"
+                android:textSize="15sp" />
+
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="75dp"
-                android:layout_marginLeft="20dp"
-                android:foreground="?android:attr/selectableItemBackground"
-                app:cardCornerRadius="4dp"
-                app:cardPreventCornerOverlap="false"
-                app:cardUseCompatPadding="true">
+                android:layout_height="0.5dp"
+                android:background="#ffcdcdcd" />
+        </LinearLayout>
+    </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/address_list_ll_item"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@color/colorBlue"
-                    android:orientation="vertical"
-                    android:gravity="center_vertical"
-                    android:translationZ="2dp">
-                  <TextView
-                      android:id="@+id/address_list_tv_name"
-                      android:layout_width="wrap_content"
-                      android:layout_marginLeft="60dp"
-                      android:textColor="@color/white"
-                      android:textSize="15sp"
-                      android:text="本机昵称"
-                      android:layout_height="wrap_content" />
+    <LinearLayout
+        android:id="@+id/headview_ll_group"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/address_list_tv_phone"
-                        android:layout_width="wrap_content"
-                        android:layout_marginLeft="60dp"
-                        android:textColor="@color/white"
-                        android:textSize="15sp"
-                        android:layout_marginTop="5dp"
-                        android:text="12345678987"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-            </android.support.v7.widget.CardView>
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="21dp"
+            android:layout_marginLeft="22dp"
+            android:src="@drawable/group_icon" />
 
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/item_chat_civ_head"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:layout_centerVertical="true"
-                android:src="@drawable/head"
-                android:translationZ="4dp"
-                app:civ_border_color="#dce2e9"
-                app:civ_border_width="2dp" />
-        </RelativeLayout>
-    </RelativeLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="22dp"
+            android:layout_marginRight="22dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="群聊"
+                android:textColor="#ff333333"
+                android:textSize="15sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="#ffcdcdcd" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/headview_ll_linkman"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="21dp"
+            android:layout_marginLeft="22dp"
+            android:src="@drawable/linkman_icon" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="22dp"
+            android:layout_marginRight="22dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="联系人"
+                android:textColor="#ff333333"
+                android:textSize="15sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:background="#fff8f8f8"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:text="联系人"
+            android:textColor="#ff999999"
+            android:textSize="12sp" />
+    </LinearLayout>
 </LinearLayout>

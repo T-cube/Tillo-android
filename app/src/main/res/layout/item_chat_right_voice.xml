@@ -20,72 +20,58 @@
         android:visibility="gone" />
 
     <LinearLayout
-        android:id="@+id/item_chat_right_voice_ll_content"
-        android:layout_width="120dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
-        android:layout_marginRight="15dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/chat_bg_right"
-        android:orientation="vertical">
+        android:layout_marginTop="15dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/item_chat_pb_right_failed"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_gravity="center_vertical"
+            android:padding="10dp"
+            android:src="@drawable/send_failed"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/item_chat_pb_right_progress"
+            android:layout_width="21dp"
+            android:layout_height="21dp"
+            android:layout_gravity="center_vertical"
+            android:visibility="gone" />
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:gravity="center"
+            android:id="@+id/item_chat_right_voice_ll_content"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="6dp"
+            android:layout_marginRight="28dp"
+            android:background="@drawable/send_bg"
+            android:gravity="right"
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/item_chat_txt_right_duration"
+                android:id="@+id/item_chat_right_voice_tv_duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
                 android:textColor="@color/colorBlack"
-                android:textSize="15sp" />
+                android:textSize="12sp" />
 
-            <RelativeLayout
-                android:layout_width="60dp"
-                android:layout_height="match_parent">
 
-                <ImageView
-                    android:id="@+id/item_chat_voice_right_plays"
-                    android:layout_width="match_parent"
-                    android:layout_height="45dp"
-                    android:layout_centerInParent="true"
-                    android:padding="10dp"
-                    android:src="@drawable/play" />
-
-                <ProgressBar
-                    android:id="@+id/item_chat_voice_right_progress"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_centerInParent="true"
-                    android:visibility="invisible" />
-
-                <ImageView
-                    android:id="@+id/item_chat_voice_right_stop"
-                    android:layout_width="match_parent"
-                    android:layout_height="45dp"
-                    android:layout_centerInParent="true"
-                    android:padding="10dp"
-                    android:src="@drawable/stop"
-                    android:visibility="gone" />
-            </RelativeLayout>
+            <ImageView
+                android:id="@+id/item_chat_right_voice_iv_play"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:background="@drawable/voice_right3" />
 
 
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/item_chat_txt_right_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:layout_marginRight="10dp"
-            android:gravity="center"
-            android:paddingBottom="5dp"
-            android:paddingRight="10dp"
-            android:text="10:30PM"
-            android:textColor="#b0afaf"
-            android:textSize="11sp" />
-
     </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="10dp" />
 </LinearLayout>

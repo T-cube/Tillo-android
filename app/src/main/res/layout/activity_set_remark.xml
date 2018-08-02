@@ -48,6 +48,7 @@
         android:textSize="15sp"
         android:textColor="#404040"
         android:maxEms="30"
+        android:singleLine="true"
         android:paddingLeft="15dp"
         android:background="@drawable/search_view_shape" />
 

@@ -25,6 +25,47 @@ public class ChatMessage extends DataSupport implements Serializable {
     private String local_path;
     private String sourceid;
     private String duration;
+    @Column(ignore = true)
+    private boolean isUpOrDownLoad = false;
+    private String image_path;//大图
+    private String group;
+    private int sendState = 1;//0、发送中 1、发送成功 2、发送失败
+    private String msg_id;//标识消息
+    @JSONField(name = "filename")
+    private String fileName;
+    private boolean isRead;
+
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public void setRead(boolean read) {
+        isRead = read;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
+    public String getImage_path() {
+        return image_path;
+    }
+
+    public void setImage_path(String image_path) {
+        this.image_path = image_path;
+    }
+
+    public boolean isUpOrDownLoad() {
+        return isUpOrDownLoad;
+    }
+
+    public void setUpOrDownLoad(boolean upOrDownLoad) {
+        isUpOrDownLoad = upOrDownLoad;
+    }
 
     public String getDuration() {
         return duration;
@@ -104,5 +145,29 @@ public class ChatMessage extends DataSupport implements Serializable {
 
     public void setLocal_path(String local_path) {
         this.local_path = local_path;
+    }
+
+    public String getMsg_id() {
+        return msg_id;
+    }
+
+    public void setMsg_id(String msg_id) {
+        this.msg_id = msg_id;
+    }
+
+    public int getSendState() {
+        return sendState;
+    }
+
+    public void setSendState(int sendState) {
+        this.sendState = sendState;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }

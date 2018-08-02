@@ -1,6 +1,7 @@
 package application;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
@@ -13,6 +14,7 @@ import com.lzy.okgo.OkGo;
 import com.yumeng.tillo.MainActivity;
 import com.yumeng.tillo.R;
 
+import org.greenrobot.eventbus.EventBus;
 import org.litepal.LitePal;
 
 import java.util.Collections;
@@ -22,9 +24,12 @@ import java.util.List;
 import java.util.Stack;
 
 import base.BaseApplication;
+import bean.MessageEvent;
+import constants.Constants;
 import pomelo.PomeloClient;
 import receiver.NetWorkStateReceiver;
 import utils.MyActivityLifeCycleCallbacks;
+import utils.SharedDataTool;
 
 /**
  * Created by Administrator on 2018/3/21.
@@ -34,27 +39,8 @@ public class MyApplication extends BaseApplication {
     private PomeloClient client;
     NetWorkStateReceiver netWorkStateReceiver;
     private boolean isRegister = false;
-
-//    //static 代码段可以防止内存泄露
-//    static {
-//        //设置全局的Header构建器
-//        SmartRefreshLayout.setDefaultRefreshHeaderCreator(new DefaultRefreshHeaderCreator() {
-//            @Override
-//            public RefreshHeader createRefreshHeader(Context context, RefreshLayout layout) {
-//                layout.setPrimaryColorsId(R.color.colorPrimary, android.R.color.white);//全局设置主题颜色
-//                return new ClassicsHeader(context);//.setTimeFormat(new DynamicTimeFormat("更新于 %s"));//指定为经典Header，默认是 贝塞尔雷达Header
-//            }
-//        });
-//        //设置全局的Footer构建器
-//        SmartRefreshLayout.setDefaultRefreshFooterCreator(new DefaultRefreshFooterCreator() {
-//            @Override
-//            public RefreshFooter createRefreshFooter(Context context, RefreshLayout layout) {
-//                //指定为经典Footer，默认是 BallPulseFooter
-//                return new ClassicsFooter(context).setDrawableSize(20);
-//            }
-//        });
-//    }
-
+    private int count = 0;
+    private boolean isChanged = false;
     private static Context context;
 
     public static Context getContext() {
@@ -76,6 +62,7 @@ public class MyApplication extends BaseApplication {
         context = this;
         registerActivityLifeCallback();
         initGo();
+//        frontOrBack();
         LitePal.initialize(this);
 //        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N) {
 //            registerNetWorkChangedReceiver();
@@ -186,8 +173,64 @@ public class MyApplication extends BaseApplication {
             @Override
             public void onAvailable(Network network) {
                 super.onAvailable(network);
-                Log.e("NETWORK", "重连上了");
             }
         });
     }
+
+
+    /**
+     * 判断在前台还是后台
+     */
+    private void frontOrBack() {
+        //前后台切换判断
+        registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
+            @Override
+            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+
+            }
+
+            @Override
+            public void onActivityStarted(Activity activity) {
+                if (count == 0) {
+                    Log.v("vergo", "**********切到前台**********");
+                    SharedDataTool.setBoolean(activity, "isBackGround", false);
+                    //重新连接PomeloClient
+                    if (isChanged)
+                        EventBus.getDefault().post(new MessageEvent(Constants.TARGET_SERVICE, Constants.MESSAGE_INIT_CLIENT, null));
+                    isChanged = false;
+                }
+                count++;
+            }
+
+            @Override
+            public void onActivityResumed(Activity activity) {
+            }
+
+            @Override
+            public void onActivityPaused(Activity activity) {
+            }
+
+            @Override
+            public void onActivityStopped(Activity activity) {
+                count--;
+                if (count == 0) {
+                    Log.v("vergo", "**********切到后台**********");
+                    SharedDataTool.setBoolean(activity, "isBackGround", true);
+                    isChanged = true;
+                }
+            }
+
+            @Override
+            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+
+            }
+
+            @Override
+            public void onActivityDestroyed(Activity activity) {
+
+            }
+        });
+    }
+
+
 }

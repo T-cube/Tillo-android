@@ -62,7 +62,7 @@ public class AudioRecorderButton extends android.support.v7.widget.AppCompatButt
     //取消提示对话框
     private static final int MSG_DIALOG_DIMISS = 0x112;
     private RxPermissions rxPermissions;
-
+    private boolean isRequest = false;
     /**
      * @description 获取音量大小的线程
      * @author ldm
@@ -128,25 +128,10 @@ public class AudioRecorderButton extends android.support.v7.widget.AppCompatButt
         setOnLongClickListener(new OnLongClickListener() {
 
             public boolean onLongClick(View v) {
-//                rxPermissions.request(Manifest.permission.RECORD_AUDIO,
-//                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
-//                        .subscribe(new io.reactivex.functions.Consumer<Boolean>() {
-//                            @Override
-//                            public void accept(Boolean aBoolean) throws Exception {
-//                                //权限已经开启   enableCrop:是否裁剪
-//                                if (aBoolean) {
-//                                    mReady = true;
-//                                    mAudioManager.prepareAudio();
-//                                } else {
-//                                    //未开启权限，弹出提示框
-//
-//                                }
-//
-//
-//                            }
-//                        });
-                mReady = true;
-                mAudioManager.prepareAudio();
+                if (isRequest) {
+                    mReady = true;
+                    mAudioManager.prepareAudio();
+                }
                 return false;
             }
         });
@@ -186,17 +171,16 @@ public class AudioRecorderButton extends android.support.v7.widget.AppCompatButt
         int x = (int) event.getX();
         // 获得y轴坐标
         int y = (int) event.getY();
-
         switch (action) {
             case MotionEvent.ACTION_DOWN://手指按下
-                changeState(STATE_RECORDING);
                 rxPermissions.request(Manifest.permission.RECORD_AUDIO,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        .subscribe(new io.reactivex.functions.Consumer<Boolean>() {
-                            @Override
-                            public void accept(Boolean aBoolean) throws Exception {
-
-                            }
+                        .subscribe(aBoolean -> {
+                            if (aBoolean) {
+                                isRequest = true;
+                                changeState(STATE_RECORDING);
+                            } else
+                                isRequest = false;
                         });
                 break;
             case MotionEvent.ACTION_MOVE://手指移动
@@ -215,7 +199,7 @@ public class AudioRecorderButton extends android.support.v7.widget.AppCompatButt
                     reset();
                     return super.onTouchEvent(event);
                 }
-                if (!isRecording || mTime < 0.6f) {//如果时间少于0.6s，则提示录音过短
+                if (!isRecording || mTime < 1.0f) {//如果时间少于1s，则提示录音过短
                     mDialogManager.tooShort();
                     mAudioManager.cancel();
                     // 延迟显示对话框

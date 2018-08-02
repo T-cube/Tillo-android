@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical"
+    tools:context="com.yumeng.tillo.GroupSettingActivity">
+
+    <include layout="@layout/titlebar_info" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/group_setting_rv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:overScrollMode="never"
+        android:scrollbars="none"></android.support.v7.widget.RecyclerView>
+    <!--查看更多成员-->
+    <LinearLayout
+        android:id="@+id/group_setting_ll_more"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="查看更多成员"
+            android:textColor="#ff999999"
+            android:textSize="11sp" />
+
+        <ImageView
+            android:layout_width="6dp"
+            android:layout_height="11dp"
+            android:layout_marginLeft="6dp"
+            android:src="@drawable/arrow_right" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="15dp"
+        android:background="#FFF8F8F8" />
+
+    <LinearLayout
+        android:id="@+id/friend_info_ll_remark"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="群聊名称"
+            android:textColor="#ff000000"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/friend_info_tv_remark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:textColor="#ff999999"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="19dp"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/arrow_info" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="15dp"
+        android:background="#ffe5e5e5" />
+
+    <LinearLayout
+        android:id="@+id/friend_info_ll_top"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="置顶聊天"
+            android:textColor="#ff000000"
+            android:textSize="15sp" />
+
+        <Switch
+            android:id="@+id/friend_info_istop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="15dp"
+            android:switchMinWidth="20dp"
+            android:thumb="@drawable/thumb_selector"
+            android:track="@drawable/track" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="15dp"
+        android:background="#ffe5e5e5" />
+
+    <LinearLayout
+        android:id="@+id/friend_info_ll_disturb"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:text="消息勿扰"
+            android:textColor="#ff000000"
+            android:textSize="15sp" />
+
+        <Switch
+            android:id="@+id/friend_info_disturb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="15dp"
+            android:switchMinWidth="20dp"
+            android:thumb="@drawable/thumb_selector"
+            android:track="@drawable/track" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="15dp"
+        android:background="#FFF8F8F8" />
+
+    <LinearLayout
+        android:id="@+id/friend_info_ll_delete_recorder"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:text="清除对话"
+            android:textColor="#ffff6379"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="15dp"
+        android:background="#ffe5e5e5" />
+
+    <LinearLayout
+        android:id="@+id/friend_info_ll_quit_group"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:text="退出群组"
+            android:textColor="#ffff6379"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#FFF8F8F8" />
+</LinearLayout>

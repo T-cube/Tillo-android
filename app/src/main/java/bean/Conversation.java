@@ -1,5 +1,7 @@
 package bean;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import org.litepal.annotation.Column;
 import org.litepal.crud.DataSupport;
 
@@ -15,9 +17,22 @@ public class Conversation extends DataSupport {
     private String roomid;
     private String content;//最后一条消息内容
     private long timestamp;//最后一条消息时间
-    private int unread;//未读消息数
+    private int unread;//离线未读消息数
+    private String group;
+    private String avatar;
+    private String name;
+    private String friendId;
+    private int onlineMessage;//在线未读消息数
     @Column(ignore = true)
     private List<FriendInfo> friendInfo;
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
 
     public String getRoomid() {
         return roomid;
@@ -57,5 +72,37 @@ public class Conversation extends DataSupport {
 
     public void setFriendInfo(List<FriendInfo> friendInfo) {
         this.friendInfo = friendInfo;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getFriendId() {
+        return friendId;
+    }
+
+    public void setFriendId(String friendId) {
+        this.friendId = friendId;
+    }
+
+    public int getOnlineMessage() {
+        return onlineMessage;
+    }
+
+    public void setOnlineMessage(int onlineMessage) {
+        this.onlineMessage = onlineMessage;
     }
 }

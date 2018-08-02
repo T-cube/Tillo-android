@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/linkman_search_toolbar"
+            layout="@layout/search_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" />
+
+        <View
+            android:id="@+id/linkman_search_v_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_below="@id/linkman_search_toolbar"
+            android:layout_marginTop="6dp"
+            android:background="#ffcccccc" />
+
+
+        <!--<include-->
+            <!--android:id="@+id/menu_lv_headview"-->
+            <!--layout="@layout/address_list_headview"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="183dp"-->
+            <!--app:layout_scrollFlags="scroll|enterAlways|snap" />-->
+
+
+        <ListView
+            android:id="@+id/menu_lv_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@color/transparent"
+            android:dividerHeight="5dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+    </LinearLayout>
+
+    <views.WordsNavigation
+        android:id="@+id/menu_wn_word"
+        android:layout_width="30dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="60dp" />
+
+    <TextView
+        android:id="@+id/menu_tv_tips"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/tvstyle"
+        android:gravity="center"
+        android:textSize="40sp"
+        android:visibility="gone" />
+</RelativeLayout>

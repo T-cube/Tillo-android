@@ -75,12 +75,12 @@ public class VerifyInfoAdapter extends BaseAdapter {
             holder.headCiv = Utils.findViewsById(convertView, R.id.item_adf_civ_head);
             //昵称
             holder.nickTv = Utils.findViewsById(convertView, R.id.item_adf_tv_nick);
-            //手机号吗
-            holder.phoneTv = Utils.findViewsById(convertView, R.id.item_adf_tv_phone);
-            //备注信息
-            holder.contentTv = Utils.findViewsById(convertView, R.id.item_adf_tv_content);
-            //添加好友
-            holder.addFriendTv = Utils.findViewsById(convertView, R.id.item_adf_tv_add);
+            //备注
+            holder.contentTv=Utils.findViewsById(convertView,R.id.item_adf_tv_remark);
+            //状态
+            holder.stateTv = Utils.findViewsById(convertView, R.id.item_adf_tv_state);
+            //同意
+            holder.addFriendTv=Utils.findViewsById(convertView,R.id.item_adf_bt_add);
             convertView.setTag(holder);
         } else {
             holder = (VerifyHolder) convertView.getTag();
@@ -99,8 +99,8 @@ public class VerifyInfoAdapter extends BaseAdapter {
             holder.contentTv.setText(bean.getMark());
         //添加按钮
         if (bean.getStatus().equals("STATUS_FRIEND_REQUEST_PADDING")) {
-            holder.addFriendTv.setText("添加");
-            holder.addFriendTv.setTextColor(context.getResources().getColor(R.color.textBlue));
+            holder.stateTv.setVisibility(View.GONE);
+            holder.addFriendTv.setVisibility(View.VISIBLE);
             holder.addFriendTv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -109,8 +109,8 @@ public class VerifyInfoAdapter extends BaseAdapter {
                 }
             });
         } else {
-            holder.addFriendTv.setText("已添加");
-            holder.addFriendTv.setTextColor(context.getResources().getColor(R.color.colorGray));
+           holder.stateTv.setVisibility(View.VISIBLE);
+           holder.addFriendTv.setVisibility(View.GONE);
         }
 
         return convertView;
@@ -151,6 +151,6 @@ public class VerifyInfoAdapter extends BaseAdapter {
 
     public class VerifyHolder {
         private CircleImageView headCiv;
-        private TextView nickTv, phoneTv, contentTv, addFriendTv;
+        private TextView nickTv,  contentTv, addFriendTv,stateTv;
     }
 }
