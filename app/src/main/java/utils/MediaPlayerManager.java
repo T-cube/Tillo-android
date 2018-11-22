@@ -1,9 +1,14 @@
 package utils;
 
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+
+import application.MyApplication;
 
 /**
  * @param
@@ -24,30 +29,35 @@ public class MediaPlayerManager {
      * @time 2016/6/25 11:30
      */
     public static void playSound(String filePath, MediaPlayer.OnCompletionListener onCompletionListener) {
-        if (mMediaPlayer == null) {
-            mMediaPlayer = new MediaPlayer();
-            //设置一个error监听器
-            mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+        try {
+            File file = new File(filePath);
+            FileInputStream fis = new FileInputStream(file);
 
-                public boolean onError(MediaPlayer arg0, int arg1, int arg2) {
-                    mMediaPlayer.reset();
-                    return false;
+            if (mMediaPlayer == null) {
+                mMediaPlayer = new MediaPlayer();
+                //设置一个error监听器
+                mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                    public boolean onError(MediaPlayer arg0, int arg1, int arg2) {
+                        mMediaPlayer.reset();
+                        return false;
+                    }
+                });
+            } else {
+                mMediaPlayer.reset();
+            }
+            mMediaPlayer.setAudioStreamType(android.media.AudioManager.STREAM_MUSIC);
+            mMediaPlayer.setDataSource(fis.getFD());
+            mMediaPlayer.setOnCompletionListener(onCompletionListener);
+            mMediaPlayer.prepareAsync();
+            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mMediaPlayer.start();
                 }
             });
-        } else {
-            mMediaPlayer.reset();
-        }
-
-        try {
-            mMediaPlayer.setAudioStreamType(android.media.AudioManager.STREAM_MUSIC);
-            mMediaPlayer.setOnCompletionListener(onCompletionListener);
-            mMediaPlayer.setDataSource(filePath);
-            mMediaPlayer.prepare();
-            mMediaPlayer.start();
-        } catch (IllegalStateException e) {
-            Log.e("IllegalStateException", e.getMessage() + filePath);
-        } catch (IOException e) {
-            Log.e("IOException", e.getMessage() + filePath);
+        } catch (Exception e) {
+            Log.e("IllegalStateException", e.getMessage());
+            Log.e("IllegalStateException", filePath);
         }
     }
 
@@ -102,10 +112,14 @@ public class MediaPlayerManager {
     }
 
     public static void stop() {
-        if (mMediaPlayer != null) {
+        if (mMediaPlayer != null) {//mediaplayer 是MediaPlayer的 instance
             mMediaPlayer.stop();
+//            try {
+//                mMediaPlayer.prepare();//stop后下次重新播放要首先进入prepared状态
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
     }
-
 
 }

@@ -2,15 +2,28 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.yumeng.tillo">
 
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
 
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <!-- 添加震动权限 -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_USER_PRESENT" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!-- Optional. Required for location feature -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
@@ -21,7 +34,7 @@
     <application
         android:name="application.MyApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher1"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -56,12 +69,67 @@
         <activity android:name=".TelBookActivity" />
         <activity android:name=".TelRecorderlActivity" />
         <activity android:name=".VerifyInfoActivity" />
-
         <service android:name="service.PomeloService" />
 
         <activity android:name=".SetNickNameActivity" />
         <activity android:name=".CameraSelectorActivity" />
         <activity android:name=".NationCodeActivity" />
+
+        <!--信鸽-->
+        <receiver android:name="com.tencent.android.tpush.XGPushReceiver"
+            android:process=":xg_service_v3" >
+            <intent-filter android:priority="0x7fffffff" >
+                <!-- 【必须】 信鸽SDK的内部广播 -->
+                <action android:name="com.tencent.android.tpush.action.SDK" />
+                <action android:name="com.tencent.android.tpush.action.INTERNAL_PUSH_MESSAGE" />
+                <!-- 【必须】 系统广播：开屏和网络切换 -->
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <!-- 【可选】 一些常用的系统广播，增强信鸽service的复活机会，请根据需要选择。当然，你也可以添加APP自定义的一些广播让启动service -->
+                <action android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+            </intent-filter>
+        </receiver>
+        <!-- 【必须】 信鸽service -->
+        <service
+            android:name="com.tencent.android.tpush.service.XGPushServiceV3"
+            android:exported="true"
+            android:persistent="true"
+            android:process=":xg_service_v3" />
+
+        <!-- 【必须】 提高service的存活率 -->
+        <service
+            android:name="com.tencent.android.tpush.rpc.XGRemoteService"
+            android:exported="true">
+            <intent-filter>
+                <!-- 【必须】 请修改为当前APP包名 .PUSH_ACTION, 如demo的包名为：com.qq.xgdemo -->
+                <action android:name="当前应用的包名.PUSH_ACTION" />
+            </intent-filter>
+        </service>
+
+
+        <!-- 【必须】 【注意】authorities修改为 包名.AUTH_XGPUSH, 如demo的包名为：com.qq.xgdemo-->
+        <provider
+            android:name="com.tencent.android.tpush.XGPushProvider"
+            android:authorities="com.yumeng.tillo.AUTH_XGPUSH"
+            android:exported="true"/>
+
+        <!-- 【必须】 【注意】authorities修改为 包名.TPUSH_PROVIDER, 如demo的包名为：com.qq.xgdemo-->
+        <provider
+            android:name="com.tencent.android.tpush.SettingsContentProvider"
+            android:authorities="com.yumeng.tillo.TPUSH_PROVIDER"
+            android:exported="false" />
+®
+
+        <!-- 【必须】 请将YOUR_ACCESS_ID修改为APP的AccessId，“21”开头的10位数字，中间没空格 -->
+        <meta-data
+            android:name="XG_V2_ACCESS_ID"
+            android:value="2100314079" />
+        <!-- 【必须】 请将YOUR_ACCESS_KEY修改为APP的AccessKey，“A”开头的12位字符串，中间没空格 -->
+        <meta-data
+            android:name="XG_V2_ACCESS_KEY"
+            android:value="A7WKT4C543DN" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -76,7 +144,7 @@
         <activity android:name=".PersonInfoActivity" />
         <activity android:name=".SettingActivity" />
         <activity android:name=".FriendVerifyActivity" />
-        <activity android:name=".FriendInfoActivity" />
+        <activity android:name=".TestActivity" />
         <activity android:name=".AlertInfoActivity" />
         <activity android:name=".AlertSexActivity" />
         <activity android:name=".AlertRemarkActivity" />
@@ -86,7 +154,61 @@
         <activity android:name=".AddMemberActivity" />
         <activity android:name=".AlertGroupNameActivity" />
         <activity android:name=".GroupListActivity" />
-        <activity android:name=".RegisterSuccessActivity"></activity>
+        <activity android:name=".RegisterSuccessActivity" />
+        <activity android:name=".VoiceActivity" />
+        <activity android:name=".VoiceCallActivity" />
+        <activity android:name=".VideoActivity" />
+        <activity android:name=".VideoCallActivity" />
+        <activity android:name=".DeleteMemberActivity" />
+        <activity android:name=".GroupMemberInfoActivity" />
+        <activity android:name=".ClauseActivity" />
+         <receiver android:name="receiver.MessageReceiver"
+         android:exported="true" >
+         <intent-filter>
+         <!-- 接收消息透传 -->
+         <action android:name="com.tencent.android.tpush.action.PUSH_MESSAGE" />
+         <!-- 监听注册、反注册、设置/删除标签、通知被点击等处理结果 -->
+         <action android:name="com.tencent.android.tpush.action.FEEDBACK" />
+         </intent-filter>
+         </receiver>
+        <activity android:name=".FriendInfoActivity"></activity>
+        <receiver
+            android:name="mpush.MPushReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="com.mpush.HEALTH_CHECK" />
+                <action android:name="com.mpush.NOTIFY_CANCEL" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="mpush.MPushService"
+            android:enabled="true"
+            android:exported="true" />
+        <service android:name="mpush.MPushFakeService" />
+
+        <receiver
+            android:name="receiver.MyReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.mpush.MESSAGE_RECEIVED" />      <!--收到PUSH消息-->
+                <action android:name="com.mpush.KICK_USER" />             <!--收到踢人消息-->
+                <action android:name="com.mpush.CONNECTIVITY_CHANGE" />   <!--收到链接变化-->
+                <action android:name="com.mpush.HANDSHAKE_OK" />          <!--收到握手成功消息-->
+                <action android:name="com.mpush.BIND_USER" />             <!--收到绑定用户消息-->
+                <action android:name="com.mpush.UNBIND_USER" />           <!--收到解绑用户消息-->
+
+                <!--此值要改为自己的应用的applicationId  @see MPushService-->
+                <category android:name="com.yumeng.tillo" />
+            </intent-filter>
+        </receiver>
+
+
+
+
     </application>
 
 </manifest>

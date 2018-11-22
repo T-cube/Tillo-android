@@ -232,5 +232,10 @@ public class MyApplication extends BaseApplication {
         });
     }
 
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        //信鸽 开启厂商通道初始化代码
 
+    }
 }

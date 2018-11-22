@@ -65,7 +65,7 @@
                 android:id="@+id/item_chat_right_voice_iv_play"
                 android:layout_width="15dp"
                 android:layout_height="15dp"
-                android:background="@drawable/voice_right3" />
+                android:src="@drawable/voice_right3" />
 
 
         </LinearLayout>

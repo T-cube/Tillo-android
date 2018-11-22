@@ -8,35 +8,42 @@ import java.io.Serializable;
 
 public class FriendBean implements Serializable {
 
-    private String _id;
-    private String name;
+    private String id;
+    private String requestId;
     private String avatar;
-    private String recevier;
-    private String from;
-    private String mark;
-    private String create_at;
+    private String remark;
+    private String roomId;
+    private String mobile;
+    private String name;
+    private int sex;
     /**
-     * STATUS_FRIEND_REQUEST_PADDING // 待处理
-     * STATUS_FRIEND_REQUEST_AGREE   // 已同意
-     * STATUS_FRIEND_REQUEST_REJECT  // 已拒绝
-     * STATUS_FRIEND_REQUEST_IGNORE  // 已忽略
+     * 0 // 待处理
+     * 1   // 已同意
      */
-    private String status;
+    private int status;
 
-    public String get_id() {
-        return _id;
+    public int getStatus() {
+        return status;
     }
 
-    public void set_id(String _id) {
-        this._id = _id;
+    public void setStatus(int status) {
+        this.status = status;
     }
 
-    public String getName() {
-        return name;
+    public String getId() {
+        return id;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
     public String getAvatar() {
@@ -47,43 +54,43 @@ public class FriendBean implements Serializable {
         this.avatar = avatar;
     }
 
-    public String getRecevier() {
-        return recevier;
+    public String getRemark() {
+        return remark;
     }
 
-    public void setRecevier(String recevier) {
-        this.recevier = recevier;
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 
-    public String getFrom() {
-        return from;
+    public String getRoomId() {
+        return roomId;
     }
 
-    public void setFrom(String from) {
-        this.from = from;
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 
-    public String getMark() {
-        return mark;
+    public String getMobile() {
+        return mobile;
     }
 
-    public void setMark(String mark) {
-        this.mark = mark;
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
     }
 
-    public String getCreate_at() {
-        return create_at;
+    public String getName() {
+        return name;
     }
 
-    public void setCreate_at(String create_at) {
-        this.create_at = create_at;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getStatus() {
-        return status;
+    public int getSex() {
+        return sex;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setSex(int sex) {
+        this.sex = sex;
     }
 }

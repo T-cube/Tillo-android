@@ -13,38 +13,32 @@ import java.util.List;
  */
 
 public class GroupInfo extends DataSupport implements Serializable {
-    @JSONField(name = "_id")
-    private String group_id;
     private String name;//群名称
     private String creator;//创建者
     private String owner;//群主
     @Column(unique = true)
-    private String roomid;//房间号
-    private String create_at;//创建时间
+    private String roomId;//房间号
     @Column(ignore = true)
     private List<GroupMember> groupMembers;
     @Column(ignore = true)
     private ChatMessage message;
-    private String content;//消息内容
-    @JSONField(name = "_offline_count")
-    private int offline_count;//未读消息
-    private int onlineMessage;//在线未读消息数
+//    private String content;//消息内容
+//    @JSONField(name = "_offline_count")
+//    private int offline_count;//未读消息
+//    private int onlineMessage;//在线未读消息数
     private String avatar;
+    private String isTop;//是否置顶
+    @Column(ignore = true)
+    private Setting settings;
+    private String block;//0、不屏蔽 1、屏蔽
+    private String not_disturb;//0、正常接收 1、免打扰
 
     public List<GroupMember> getGroupMembers() {
-        return DataSupport.where("group_id=?", group_id).find(GroupMember.class);
+        return DataSupport.where("roomid=?", roomId).find(GroupMember.class);
     }
 
     public void setGroupMembers(List<GroupMember> groupMembers) {
         this.groupMembers = groupMembers;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
     }
 
     public ChatMessage getMessage() {
@@ -53,22 +47,6 @@ public class GroupInfo extends DataSupport implements Serializable {
 
     public void setMessage(ChatMessage message) {
         this.message = message;
-    }
-
-    public int getOffline_count() {
-        return offline_count;
-    }
-
-    public void setOffline_count(int offline_count) {
-        this.offline_count = offline_count;
-    }
-
-    public String getGroup_id() {
-        return group_id;
-    }
-
-    public void setGroup_id(String group_id) {
-        this.group_id = group_id;
     }
 
     public String getName() {
@@ -95,22 +73,6 @@ public class GroupInfo extends DataSupport implements Serializable {
         this.owner = owner;
     }
 
-    public String getRoomid() {
-        return roomid;
-    }
-
-    public void setRoomid(String roomid) {
-        this.roomid = roomid;
-    }
-
-    public String getCreate_at() {
-        return create_at;
-    }
-
-    public void setCreate_at(String create_at) {
-        this.create_at = create_at;
-    }
-
     public String getAvatar() {
         return avatar;
     }
@@ -119,11 +81,43 @@ public class GroupInfo extends DataSupport implements Serializable {
         this.avatar = avatar;
     }
 
-    public int getOnlineMessage() {
-        return onlineMessage;
+    public String getIsTop() {
+        return isTop;
     }
 
-    public void setOnlineMessage(int onlineMessage) {
-        this.onlineMessage = onlineMessage;
+    public void setIsTop(String isTop) {
+        this.isTop = isTop;
+    }
+
+    public Setting getSettings() {
+        return settings;
+    }
+
+    public void setSettings(Setting settings) {
+        this.settings = settings;
+    }
+
+    public String getBlock() {
+        return block;
+    }
+
+    public void setBlock(String block) {
+        this.block = block;
+    }
+
+    public String getNot_disturb() {
+        return not_disturb;
+    }
+
+    public void setNot_disturb(String not_disturb) {
+        this.not_disturb = not_disturb;
+    }
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 }

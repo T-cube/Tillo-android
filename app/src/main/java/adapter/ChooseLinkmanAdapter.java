@@ -54,7 +54,7 @@ public class ChooseLinkmanAdapter extends BaseAdapter {
         this.context = context;
         mInflater = LayoutInflater.from(context);
         userInfo = AppSharePre.getPersonalInfo();
-        fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getUid();
+        fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getId();
         boolean makeFolderState = FileUtils.makeFolders(fileForderPath);
     }
 
@@ -149,7 +149,7 @@ public class ChooseLinkmanAdapter extends BaseAdapter {
     public void downloadHeadImage(String avatar, String targetId, CircleImageView imageView) {
         if (TextUtils.isEmpty(avatar))
             return;
-        String fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getUid();
+        String fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getId();
         boolean makeFolderState = FileUtils.makeFolders(fileForderPath);
         OkGo.<File>get(avatar)
                 .execute(new FileCallback(fileForderPath, targetId + ".jpg") {

@@ -23,6 +23,8 @@ import com.lzy.okgo.callback.FileCallback;
 import com.lzy.okgo.model.Response;
 import com.yumeng.tillo.ChatActivity;
 import com.yumeng.tillo.GroupChatActivity;
+import com.yumeng.tillo.VideoCallActivity;
+import com.yumeng.tillo.VoiceCallActivity;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -35,6 +37,7 @@ import java.io.File;
 import adapter.ChatAdapter;
 import application.MyApplication;
 import bean.ChatMessage;
+import bean.FriendInfo;
 import bean.MessageEvent;
 import bean.UserInfo;
 import constants.Constants;
@@ -45,6 +48,8 @@ import pomelo.PomeloClient;
 import receiver.NetWorkStateReceiver;
 import utils.AppSharePre;
 import utils.SharedDataTool;
+import utils.SoundPlayUtils;
+import utils.ToastUtils;
 import utils.fileutil.FileUtils;
 
 /**
@@ -72,6 +77,7 @@ public class PomeloService extends Service {
         EventBus.getDefault().register(this);
         userInfo = AppSharePre.getPersonalInfo();
         initEventMessage();
+        SoundPlayUtils.init(getApplicationContext());
     }
 
     public void initEventMessage() {
@@ -106,6 +112,7 @@ public class PomeloService extends Service {
         instance = null;
         unregisterReceiver(netWorkStateReceiver);
         EventBus.getDefault().unregister(this);
+        SoundPlayUtils.release();
     }
 
     //初始化
@@ -121,8 +128,8 @@ public class PomeloService extends Service {
         UserInfo userInfo = AppSharePre.getPersonalInfo();
         try {
             JSONObject data = new JSONObject();
-            data.put("token", userInfo.getAccess_token());
-            data.put("uid", userInfo.getUid());
+            data.put("token", userInfo.getToken());
+            data.put("uid", userInfo.getId());
             client.request("gate.gateHandler.queryEntry", data, new DataCallBack() {
                 @Override
                 public void responseData(JSONObject jsonObject) {
@@ -154,6 +161,7 @@ public class PomeloService extends Service {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        client.disconnect();
         client = new PomeloClient(Constants.SOCKET_IP, port);
         client.init();
         client.request("connector.entryHandler.enter", msg, new DataCallBack() {
@@ -162,6 +170,7 @@ public class PomeloService extends Service {
                 Log.e("enter", "enter Success!");
                 //初始化群列表界面
                 EventListener();
+                EventBus.getDefault().post(new MessageEvent(Constants.TARGET_CHAT_FRAGMENT, Constants.MESSAGE_CONNECT_SUCCESS, null));
             }
         });
     }
@@ -200,8 +209,67 @@ public class PomeloService extends Service {
                     EventBus.getDefault().post(new MessageEvent(Constants.TARGET_MAIN_ACTIVITY, Constants.MESSAGE_EVENT_FRIEND_AGREE, null));
                 } else if (type.equals("new")) {
                     //通知界面刷新验证信息
-
+                    EventBus.getDefault().post(new MessageEvent(Constants.TARGET_MAIN_ACTIVITY, Constants.MESSAGE_EVENT_NEW_FRIEND_REQUEST, null));
                 }
+            }
+        });
+        client.on("roomRequest", new DataListener() {
+            @Override
+            public void receiveData(DataEvent event) {
+                String jsonString = event.getMessage().toString();
+                com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(jsonString);
+                com.alibaba.fastjson.JSONObject bodyJson = JSON.parseObject(jsonObject.getString("body"));
+                Log.e("TAG", bodyJson.getString("message"));
+                String friendId = bodyJson.getString("message");
+                int type = bodyJson.getIntValue("style");
+                if (type == 0) {
+                    //语音
+                    Intent voiceCallIntent = new Intent(getApplicationContext(), VoiceCallActivity.class);
+                    voiceCallIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    voiceCallIntent.putExtra("message", friendId);
+                    voiceCallIntent.putExtra("type", 2);//接受者传2
+                    startActivity(voiceCallIntent);
+                } else {
+                    Intent voiceCallIntent = new Intent(getApplicationContext(), VideoCallActivity.class);
+                    voiceCallIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    voiceCallIntent.putExtra("message", friendId);
+                    voiceCallIntent.putExtra("type", 2);//接受者传2
+                    startActivity(voiceCallIntent);
+                }
+
+            }
+        });
+//        room-request-feedback
+        client.on("roomRequestFeedback", new DataListener() {
+            @Override
+            public void receiveData(DataEvent event) {
+                Log.e("TAG", "feedback");
+                String jsonString = event.getMessage().toString();
+                com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(jsonString);
+                com.alibaba.fastjson.JSONObject bodyJson = JSON.parseObject(jsonObject.getString("body"));
+                int choice = bodyJson.getIntValue("choice");
+                int type = bodyJson.getIntValue("style");
+                if (type == 0) {
+                    //语音
+                    if (choice == 0) {
+                        //通知进入房间号
+                        EventBus.getDefault().post(new MessageEvent(Constants.TARGET_VOICE_ACTIVITY, Constants.MESSAGE_EVENT_JOIN_VOICE, null));
+                    } else {
+                        EventBus.getDefault().post(new MessageEvent(Constants.TARGET_VOICE_ACTIVITY, Constants.MESSAGE_EVENT_FINISH_VOICE, null));
+                    }
+
+
+                } else {
+                    //视频
+                    if (choice == 0) {
+                        //点击接受
+                        EventBus.getDefault().post(new MessageEvent(Constants.TARGET_VIDEO_ACTIVITY, Constants.MESSAGE_EVENT_JOIN_VOICE, null));
+                    } else {
+                        EventBus.getDefault().post(new MessageEvent(Constants.TARGET_VIDEO_ACTIVITY, Constants.MESSAGE_EVENT_FINISH_VOICE, null));
+                    }
+                }
+                Log.e("TAG", "feedback" + bodyJson.toString());
+
             }
         });
         client.on("group.join", new DataListener() {
@@ -226,15 +294,15 @@ public class PomeloService extends Service {
                 break;
             case "image":
                 item.setContent("...[图片]");
-                item.setSourceid(dataJSON.getString("sourceid"));
+                item.setSourceId(dataJSON.getString("sourceid"));
                 break;
             case "file":
                 item.setContent("...[文件]");
-                item.setSourceid(dataJSON.getString("sourceid"));
+                item.setSourceId(dataJSON.getString("sourceid"));
                 break;
             case "audio":
                 item.setContent("...[语音]");
-                item.setSourceid(dataJSON.getString("sourceid"));
+                item.setSourceId(dataJSON.getString("sourceid"));
                 item.setDuration(dataJSON.getString("duration"));
                 item.setFileName(dataJSON.getString("filename"));
                 item.setSendState(0);
@@ -245,39 +313,37 @@ public class PomeloService extends Service {
 
         }
         if (dataJSON.getString("group") == null) {
-            item.setFrom(dataJSON.getString("from"));
-            item.setTarget(dataJSON.getString("target"));
-            item.setMessage_id(dataJSON.getString("_id"));
+            item.setSender(dataJSON.getString("from"));
+            item.setReceiver(dataJSON.getString("target"));
+            item.setMessageId(dataJSON.getString("_id"));
             item.setTimestamp(dataJSON.getLong("timestamp"));
             item.setRoomid(dataJSON.getString("roomid"));
             item.save();
             if (dataJSON.getString("type").equals("audio")) {
                 //下载音视频文件到本地
-                downloadAudioFile(item.getSourceid(), item, item.getFileName(), "chat");
+                downloadAudioFile(item.getSourceId(), item, item.getFileName(), "chat");
             }
             //给对话界面、聊天界面分发消息
             EventBus.getDefault().post(new MessageEvent(Constants.TARGET_CHAT_ACTIVITY, Constants.MESSAGE_EVENT_HAS_MESSAGE, item));
             EventBus.getDefault().post(new MessageEvent(Constants.TARGET_CHAT_FRAGMENT, Constants.MESSAGE_EVENT_HAS_MESSAGE, item));
         } else {
-            if (dataJSON.getString("from").equals(userInfo.getUid())) {
+            if (dataJSON.getString("from").equals(userInfo.getId())) {
                 //自己发的消息
-                item.setMessage_id(dataJSON.getString("_id"));
-                item.setFrom(dataJSON.getString("from"));
+                item.setMessageId(dataJSON.getString("_id"));
+                item.setSender(dataJSON.getString("from"));
                 item.setTimestamp(dataJSON.getLong("timestamp"));
                 item.setRoomid(dataJSON.getString("roomid"));
-                item.setGroup(dataJSON.getString("group"));
                 //给对话界面、聊天界面分发消息
             } else {
                 //群消息
-                item.setFrom(dataJSON.getString("from"));
-                item.setMessage_id(dataJSON.getString("_id"));
+                item.setSender(dataJSON.getString("from"));
+                item.setMessageId(dataJSON.getString("_id"));
                 item.setTimestamp(dataJSON.getLong("timestamp"));
                 item.setRoomid(dataJSON.getString("roomid"));
-                item.setGroup(dataJSON.getString("group"));
                 item.save();
                 if (dataJSON.getString("type").equals("audio")) {
                     //下载音视频文件到本地
-                    downloadAudioFile(item.getSourceid(), item, item.getFileName(), "group");
+                    downloadAudioFile(item.getSourceId(), item, item.getFileName(), "group");
                 }
                 //给对话界面、聊天界面分发消息
                 EventBus.getDefault().post(new MessageEvent(Constants.TARGET_GROUP_CHAT_ACTIVITY, Constants.MESSAGE_EVENT_GROUP_HAS_MESSAGE, item));
@@ -328,6 +394,7 @@ public class PomeloService extends Service {
                 if (!wifiNetworkInfo.isConnected() && !dataNetworkInfo.isConnected()) {
                     //没有网络
                     isConnected = false;
+                    EventBus.getDefault().post(new MessageEvent(Constants.TARGET_CHAT_FRAGMENT, Constants.MESSAGE_DISCONNECT_ERROR, null));
                     SharedDataTool.setBoolean(context, "network", false);
                 } else {
                     SharedDataTool.setBoolean(context, "network", true);
@@ -370,6 +437,7 @@ public class PomeloService extends Service {
                     //没有网络
                     isConnected = false;
                     SharedDataTool.setBoolean(context, "network", false);
+                    EventBus.getDefault().post(new MessageEvent(Constants.TARGET_CHAT_FRAGMENT, Constants.MESSAGE_DISCONNECT_ERROR, null));
                 } else {
                     SharedDataTool.setBoolean(context, "network", true);
                     //判断是否是断网后重新连接
@@ -400,10 +468,10 @@ public class PomeloService extends Service {
 
     //下载音频文件
     public void downloadAudioFile(String url, final ChatMessage message, String fileName, String type) {
-        String fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getUid();
+        String fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getId();
         Activity currentActivity = MyApplication.getCurrentActivity();
         OkGo.<File>get(Constants.TSHION_URL + Constants.downloadFile + url)
-                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
+                .headers("Authorization", "Bearer " + userInfo.getToken())
                 .execute(new FileCallback(fileForderPath, fileName) {
                     @Override
                     public void onSuccess(Response<File> response) {
@@ -411,20 +479,20 @@ public class PomeloService extends Service {
                         //保存文件
                         ChatMessage item = new ChatMessage();
                         item.setLocal_path(file.getAbsolutePath());
-                        item.setSourceid(message.getSourceid());
+                        item.setSourceId(message.getSourceId());
                         item.setTimestamp(message.getTimestamp());
                         item.setRoomid(message.getRoomid());
-                        item.setTarget(message.getTarget());
-                        item.setFrom(message.getFrom());
-                        item.setMessage_id(message.getMessage_id());
+                        item.setReceiver(message.getReceiver());
+                        item.setSender(message.getSender());
+                        item.setMessageId(message.getMessageId());
                         item.setDuration(message.getDuration());
                         item.setType(message.getType());
                         item.setContent(message.getContent());
                         item.setFileName(fileName);
-                        item.setMsg_id(message.getMsg_id());
+                        item.setBackId(message.getBackId());
                         item.setSendState(1);
-                        if (type.equals("group"))
-                            item.setGroup(message.getGroup());
+//                        if (type.equals("group"))
+//                            item.setGroup(message.getGroup());
                         if (type.equals("chat")) {
                             if (currentActivity instanceof ChatActivity) {
                                 EventBus.getDefault().post(new MessageEvent(Constants.TARGET_CHAT_ACTIVITY, Constants.MESSAGE_EVENT_UPDATE_AUDIO, item));
@@ -433,26 +501,26 @@ public class PomeloService extends Service {
                             if (currentActivity instanceof GroupChatActivity)
                                 EventBus.getDefault().post(new MessageEvent(Constants.TARGET_GROUP_CHAT_ACTIVITY, Constants.MESSAGE_EVENT_UPDATE_GROUP_AUDIO, item));
                         }
-                        item.saveOrUpdate("message_id=?", item.getMessage_id());
+                        item.saveOrUpdate("message_id=?", item.getMessageId());
                     }
 
                     @Override
                     public void onError(Response<File> response) {
                         ChatMessage item = new ChatMessage();
-                        item.setSourceid(message.getSourceid());
+                        item.setSourceId(message.getSourceId());
                         item.setTimestamp(message.getTimestamp());
                         item.setRoomid(message.getRoomid());
-                        item.setTarget(message.getTarget());
-                        item.setFrom(message.getFrom());
-                        item.setMessage_id(message.getMessage_id());
+                        item.setReceiver(message.getReceiver());
+                        item.setSender(message.getSender());
+                        item.setMessageId(message.getMessageId());
                         item.setDuration(message.getDuration());
                         item.setType(message.getType());
                         item.setContent(message.getContent());
                         item.setFileName(fileName);
-                        item.setMsg_id(message.getMsg_id());
+                        item.setBackId(message.getBackId());
                         item.setSendState(2);
-                        if (type.equals("group"))
-                            item.setGroup(message.getGroup());
+//                        if (type.equals("group"))
+//                            item.setGroup(message.getGroup());
                         if (type.equals("chat")) {
                             if (currentActivity instanceof ChatActivity) {
                                 EventBus.getDefault().post(new MessageEvent(Constants.TARGET_CHAT_ACTIVITY, Constants.MESSAGE_EVENT_UPDATE_AUDIO, item));
@@ -461,7 +529,7 @@ public class PomeloService extends Service {
                             if (currentActivity instanceof GroupChatActivity)
                                 EventBus.getDefault().post(new MessageEvent(Constants.TARGET_GROUP_CHAT_ACTIVITY, Constants.MESSAGE_EVENT_UPDATE_GROUP_AUDIO, item));
                         }
-                        item.saveOrUpdate("message_id=?", item.getMessage_id());
+                        item.saveOrUpdate("message_id=?", item.getMessageId());
                     }
                 });
     }

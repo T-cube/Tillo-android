@@ -4,24 +4,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/white"
+    android:orientation="vertical"
     tools:context="com.yumeng.tillo.RegisterSuccessActivity">
-<ImageView
-    android:layout_width="76dp"
-    android:layout_height="76dp"
-    android:src="@drawable/register_success"
-    android:layout_gravity="center_horizontal"
-    android:layout_marginTop="110dp"/>
+
+    <ImageView
+        android:layout_width="76dp"
+        android:layout_height="76dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="110dp"
+        android:src="@drawable/register_success" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_marginTop="14dp"
         android:text="注册成功!"
         android:textColor="#ff333333"
-        android:textSize="25sp"
-        android:layout_marginTop="14dp"
-        />
+        android:textSize="25sp" />
 
     <Button
         android:id="@+id/register_success_bt_login"
@@ -33,6 +34,5 @@
         android:background="@drawable/login_corner"
         android:text="立即登录"
         android:textColor="@color/white"
-        android:enabled="false"
         android:textSize="15sp" />
 </LinearLayout>

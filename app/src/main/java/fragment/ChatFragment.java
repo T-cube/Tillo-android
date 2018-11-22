@@ -19,9 +19,14 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.flyco.tablayout.SlidingTabLayout;
+import com.flyco.tablayout.listener.OnTabSelectListener;
 import com.hankkin.library.RefreshSwipeMenuListView;
 import com.hankkin.library.SwipeMenu;
 import com.hankkin.library.SwipeMenuCreator;
@@ -38,6 +43,7 @@ import com.yumeng.tillo.R;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
 import org.litepal.crud.callback.FindMultiCallback;
@@ -47,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import adapter.ChatListAdapter;
 import application.MyApplication;
@@ -65,6 +72,8 @@ import pomelo.PomeloClient;
 import service.PomeloService;
 import utils.AppSharePre;
 import utils.CommonPopupWindow;
+import utils.SharedDataTool;
+import utils.SoundPlayUtils;
 import utils.ToastUtils;
 import utils.Utils;
 
@@ -72,7 +81,7 @@ import utils.Utils;
  * tab:对话
  */
 
-public class ChatFragment extends BaseFragment {
+public class ChatFragment extends BaseFragment implements OnTabSelectListener, ViewPager.OnPageChangeListener {
     //    private List<Conversation> dataList = new ArrayList<>();
 //        private ChatListAdapter chatListAdapter;
     //消息列表
@@ -81,15 +90,19 @@ public class ChatFragment extends BaseFragment {
 //    private int position;
     private UserInfo userInfo;
     //声明控件
-    TabLayout mTabLayout;
+//    SlidingTabLayout mTabLayout;
     ViewPager mViewPager;
     private ArrayList<Fragment> fragments = new ArrayList<>();
     private String titles[] = new String[]{
-            "消息", "群聊", "语音"
+            "消息"
     };
     String groupId = "";
     private List<FriendInfo> mList = new ArrayList<>();
     private ImageView addIv;
+//    private LinearLayout stausBar;
+//    private ImageView errorIv;
+//    private ProgressBar loadPb;
+//    private TextView stausTv;
 
     @Override
     protected int getLayoutId() {
@@ -100,15 +113,14 @@ public class ChatFragment extends BaseFragment {
     protected void initView(View view, Bundle savedInstanceState) {
 //        EventBus.getDefault().register(this);
         userInfo = AppSharePre.getPersonalInfo();
-        mTabLayout = myFindViewsById(R.id.chat_tl_tab);
+//        mTabLayout = myFindViewsById(R.id.chat_tl_tab);
         mViewPager = myFindViewsById(R.id.chat_vp_pager);
         initFragment();
         MyFragmentPagerAdapter adapter = new MyFragmentPagerAdapter(getChildFragmentManager());
         mViewPager.setAdapter(adapter);
+        mViewPager.addOnPageChangeListener(this);
         mViewPager.setOffscreenPageLimit(4);
-        mTabLayout.setupWithViewPager(mViewPager);
-        mTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-        mTabLayout.setTabMode(TabLayout.MODE_FIXED);
+//        mTabLayout.setViewPager(mViewPager);
         EventBus.getDefault().register(this);
         addIv = Utils.findViewsById(view, R.id.search_iv_add_friend);
         addIv.setOnClickListener(new View.OnClickListener() {
@@ -117,6 +129,21 @@ public class ChatFragment extends BaseFragment {
                 showReminder(addIv);
             }
         });
+//        stausBar = myFindViewsById(R.id.chat_tl_ll_bar);
+//        errorIv = myFindViewsById(R.id.chat_tl_iv_error);
+//        loadPb = myFindViewsById(R.id.chat_tl_pb_progress);
+//        stausTv = myFindViewsById(R.id.chat_tl_tv);
+//        stausBar.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                //设置
+//                stausBar.setVisibility(View.VISIBLE);
+//                errorIv.setVisibility(View.GONE);
+//                loadPb.setVisibility(View.VISIBLE);
+//                stausTv.setText("连接中...");
+//                EventBus.getDefault().post(new MessageEvent(Constants.TARGET_SERVICE, Constants.MESSAGE_INIT_CLIENT, null));
+//            }
+//        });
         getFriendList();
 //        rsmLv = Utils.findViewsById(view, R.id.fragment_chat_rsmlv_listview);
 //        bindEvent();
@@ -126,8 +153,8 @@ public class ChatFragment extends BaseFragment {
     //初始化fragment
     public void initFragment() {
         fragments.add(new MessageFragment());
-        fragments.add(new GroupFragment());
-        fragments.add(new CallFragment());
+//        fragments.add(new GroupFragment());
+//        fragments.add(new CallFragment());
     }
 
 
@@ -227,38 +254,11 @@ public class ChatFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 //扫一扫
+                sendTextMessage();
             }
         });
         popupWindow.showAsDropDown(view, 0, 0);
     }
-
-//    /**
-//     * 下拉刷新
-//     */
-//    @Override
-//    public void onRefresh() {
-//        rsmLv.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                rsmLv.complete();
-//            }
-//        }, 300);
-//
-//    }
-
-
-//    /**
-//     * 加载更多
-//     */
-//    @Override
-//    public void onLoadMore() {
-//        rsmLv.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                rsmLv.complete();
-//            }
-//        }, 300);
-//    }
 
     public int dp2px(int dp, Context context) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
@@ -294,6 +294,7 @@ public class ChatFragment extends BaseFragment {
 
     private CommonPopupWindow popupWindow;
 
+
     //适配器
     class MyFragmentPagerAdapter extends FragmentStatePagerAdapter {
         public MyFragmentPagerAdapter(FragmentManager fm) {
@@ -316,16 +317,19 @@ public class ChatFragment extends BaseFragment {
         }
     }
 
+
     public Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
         }
     };
+
     //获取好友列表
     public void getFriendList() {
-        OkGo.<String>get(Constants.TSHION_URL + Constants.getFriendList)
-                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
+        OkGo.<String>get(Constants.FriendUrl + Constants.getFriendList)
+                .headers("Authorization", userInfo.getToken())
+                .params("userId", userInfo.getId())
                 .execute(new StringCallback() {
                     @Override
                     public void onSuccess(Response<String> response) {
@@ -356,75 +360,6 @@ public class ChatFragment extends BaseFragment {
                 });
     }
 
-
-
-//
-//    //获取好友列表
-//    public void getFriendList() {
-//        OkGo.<String>get(Constants.TSHION_URL + Constants.getFriendList + userInfo.getUid())
-//                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
-//                .execute(new StringCallback() {
-//                    @Override
-//                    public void onSuccess(Response<String> response) {
-//                        com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(response.body());
-//                        String message = jsonObject.getString("message");
-//                        int status = jsonObject.getIntValue("status");
-//                        com.alibaba.fastjson.JSONObject dataJson = jsonObject.getJSONObject("data");
-//                        if (status == 200) {
-//                            List<Group> groups = JSON.parseArray(dataJson.getString("groups"), Group.class);
-//                            if (groups.size() > 0) {
-//                                groupId = groups.get(0).get_id();
-//                                getGroupInfo();
-//                            }
-//                        } else {
-//                            ToastUtils.getInstance().shortToast(message);
-//                        }
-//
-//                    }
-//
-//                    @Override
-//                    public void onError(Response<String> response) {
-//                        super.onError(response);
-//                    }
-//                });
-//    }
-
-//    //获取组信息
-//    public void getGroupInfo() {
-//        OkGo.<String>get(Constants.TSHION_URL + Constants.getGroup + userInfo.getUid() + "/" + groupId)
-//                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
-//                .execute(new StringCallback() {
-//                    @Override
-//                    public void onSuccess(Response<String> response) {
-//                        com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(response.body());
-//                        String message = jsonObject.getString("message");
-//                        int status = jsonObject.getIntValue("status");
-//                        if (status == 200) {
-//                            //获取好友列表
-//                            mList = JSON.parseArray(jsonObject.getString("data"), FriendInfo.class);
-//                            //对集合排序
-//                            Collections.sort(mList, new Comparator<FriendInfo>() {
-//                                @Override
-//                                public int compare(FriendInfo lhs, FriendInfo rhs) {
-//                                    //根据拼音进行排序
-//                                    return lhs.getPinyin().compareTo(rhs.getPinyin().toUpperCase());
-//                                }
-//                            });
-//
-//                        } else {
-//                            ToastUtils.getInstance().shortToast(message);
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onError(Response<String> response) {
-//                        super.onError(response);
-//                    }
-//                });
-//
-//
-//    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -442,5 +377,87 @@ public class ChatFragment extends BaseFragment {
             if (behavior.equals(Constants.MESSAGE_EVENT_FRIEND_AGREE))
                 getFriendList();
         }
+//        else if (behavior.equals(Constants.MESSAGE_CHAT_DOT)) {
+//            //更新聊天消息红点
+//            if (mTabLayout.getCurrentTab() != 0)
+//                mTabLayout.showDot(0);
+//        } else if (behavior.equals(Constants.MESSAGE_GROUP_CHAT_DOT)) {
+//            //更新群聊消息红点
+//            if (mTabLayout.getCurrentTab() != 1)
+//                mTabLayout.showDot(1);
+//        } else if (behavior.equals(Constants.MESSAGE_CONNECT_SUCCESS)) {
+////            stausBar.setVisibility(View.GONE);
+//        } else if (behavior.equals(Constants.MESSAGE_DISCONNECT_ERROR)) {
+////            errorIv.setVisibility(View.VISIBLE);
+////            loadPb.setVisibility(View.GONE);
+////            stausTv.setText("连接失败，请重新连接");
+////            stausBar.setVisibility(View.VISIBLE);
+//        }
+    }
+
+    //tab点击事件
+
+    @Override
+    public void onTabSelect(int position) {
+        //清除被选中的消息红点
+//        mTabLayout.hideMsg(position);
+    }
+
+    @Override
+    public void onTabReselect(int position) {
+
+
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+
+    }
+
+
+    @Override
+    public void onPageSelected(int position) {
+        //清除被选中的消息红点
+//        mTabLayout.hideMsg(position);
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
+    }
+
+
+
+    //发送消息
+    public void sendTextMessage() {
+        String uuid = UUID.randomUUID().toString();
+        org.json.JSONObject params = new org.json.JSONObject();
+        Log.e("TAG_userId","userInfo.getId():"+userInfo.getId());
+        try {
+            params.put("sender", "15");
+            params.put("roomId", "504664368961552384");
+            params.put("content", "123");
+            params.put("type", "text");
+            params.put("backId", uuid);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Log.e("TAG_token",userInfo.getToken());
+        OkGo.<String>post(Constants.GroupUrl + "/push")
+                .headers("Authorization", userInfo.getToken())
+                .upJson(params)
+                .execute(new StringCallback() {
+                    @Override
+                    public void onSuccess(Response<String> response) {
+                        Log.e("TAG_groupPush", response.body());
+                    }
+
+                    @Override
+                    public void onError(Response<String> response) {
+                        Log.e("TAG_push_error", response.getException().getMessage());
+
+                    }
+                });
     }
 }

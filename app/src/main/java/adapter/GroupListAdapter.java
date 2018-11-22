@@ -48,7 +48,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.Grou
 
     public GroupListAdapter(Context context) {
         userInfo = AppSharePre.getPersonalInfo();
-        fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getUid();
+        fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getId();
         this.mContext = context;
         mList = new ArrayList<>();
     }
@@ -74,11 +74,10 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.Grou
         //昵称
         if (!TextUtils.isEmpty(item.getName()))
             holder.nickTv.setText(item.getName());
-
         //群头像
-        if (headImageIsExist(item.getGroup_id())) {
+        if (headImageIsExist(item.getRoomId())) {
             Glide.with(MyApplication.getContext())
-                    .load(senderImagePath(item.getGroup_id()))
+                    .load(senderImagePath(item.getRoomId()))
                     .error(R.drawable.head)
                     .into(holder.headCiv);
         } else {
@@ -141,10 +140,10 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.Grou
         if (TextUtils.isEmpty(groupInfo.getAvatar()))
             return;
         boolean makeFolderState = utils.fileutil.FileUtils.makeFolders(fileForderPath);
-        File cameraFile = new File(fileForderPath, groupInfo.getGroup_id() + ".jpg");
+        File cameraFile = new File(fileForderPath, groupInfo.getRoomId() + ".jpg");
         OkGo.<File>get(groupInfo.getAvatar())
-                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
-                .execute(new FileCallback(fileForderPath, groupInfo.getGroup_id() + ".jpg") {
+                .headers("Authorization", "Bearer " + userInfo.getToken())
+                .execute(new FileCallback(fileForderPath, groupInfo.getRoomId() + ".jpg") {
                     @Override
                     public void onSuccess(Response<File> response) {
                         File file = response.body();

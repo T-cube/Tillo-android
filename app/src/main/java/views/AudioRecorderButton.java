@@ -46,7 +46,7 @@ public class AudioRecorderButton extends android.support.v7.widget.AppCompatButt
     //是否开始录音标志
     private boolean isRecording = false;
     //判断在Button上滑动距离，以判断 是否取消
-    private static final int DISTANCE_Y_CANCEL = 50;
+    private static final int DISTANCE_Y_CANCEL = 100;
     //对话框管理工具类
     private DialogManager mDialogManager;
     //录音管理工具类
@@ -116,7 +116,7 @@ public class AudioRecorderButton extends android.support.v7.widget.AppCompatButt
         mDialogManager = new DialogManager(context);
         //录音文件存放地址
         UserInfo userInfo = AppSharePre.getPersonalInfo();
-        String fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getUid();
+        String fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getId();
         mAudioManager = AudioManager.getInstance(fileForderPath);
         mAudioManager.setOnAudioStateListener(new AudioManager.AudioStateListener() {
             public void wellPrepared() {
@@ -236,9 +236,9 @@ public class AudioRecorderButton extends android.support.v7.widget.AppCompatButt
 
     private boolean wantToCancle(int x, int y) {
         // 超过按钮的宽度
-        if (x < 0 || x > getWidth()) {
-            return true;
-        }
+//        if (x < 0 || x > getWidth()) {
+//            return true;
+//        }
         // 超过按钮的高度
         if (y < -DISTANCE_Y_CANCEL || y > getHeight() + DISTANCE_Y_CANCEL) {
             return true;

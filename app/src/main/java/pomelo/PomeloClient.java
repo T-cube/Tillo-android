@@ -9,10 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import bean.MessageEvent;
+import constants.Constants;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -67,7 +70,6 @@ public class PomeloClient {
     public void init() {
 
         socket.connect();
-
         socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 
             @Override
@@ -82,6 +84,7 @@ public class PomeloClient {
             public void call(Object... args) {
                 logger.info("connection is timeout.");
                 emit("connect_timeout", null);
+                EventBus.getDefault().post(new MessageEvent(Constants.TARGET_CHAT_FRAGMENT, Constants.MESSAGE_DISCONNECT_ERROR, null));
             }
         });
 
@@ -91,6 +94,7 @@ public class PomeloClient {
             public void call(Object... args) {
                 logger.info("connection is error.");
                 emit("connect_error", null);
+                EventBus.getDefault().post(new MessageEvent(Constants.TARGET_CHAT_FRAGMENT, Constants.MESSAGE_DISCONNECT_ERROR, null));
             }
         });
 

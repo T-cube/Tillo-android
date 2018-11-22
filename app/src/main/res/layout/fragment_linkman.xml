@@ -40,6 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:divider="@color/transparent"
+            android:layoutAnimation="@anim/anim_linkman_item"
             android:dividerHeight="5dp"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
     </LinearLayout>

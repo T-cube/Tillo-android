@@ -57,7 +57,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         userInfo = AppSharePre.getPersonalInfo();
         this.mContext = context;
         mList = new ArrayList<>();
-        fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getUid();
+        fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getId();
         boolean makeFolderState = FileUtils.makeFolders(fileForderPath);
     }
 
@@ -79,22 +79,46 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void onBindViewHolder(MessageViewHolder holder, int position) {
         Conversation item = mList.get(position);
-        if (headImageIsExist(item.getFriendId())) {
-            String path = fileForderPath + File.separator + item.getFriendId()
-                    + ".jpg";
-            Glide.with(MyApplication.getContext())
-                    .load(path)
-                    .error(R.drawable.head)
-                    .into(holder.headCiv);
-        } else if (!TextUtils.isEmpty(item.getAvatar())) {
-            //下载图片，保存
-            downloadHeadImage(item.getAvatar(), item.getFriendId(), holder.headCiv);
-        } else {
-            Glide.with(MyApplication.getContext())
-                    .load(R.drawable.head)
-                    .error(R.drawable.head)
-                    .into(holder.headCiv);
+        if (item.getChatType().equals("single")){
+            List<FriendInfo> friendInfos = item.getFriendInfo();
+            FriendInfo friendInfo = friendInfos.get(0);
+            //单聊
+            if (headImageIsExist(friendInfo.getFriend_id())) {
+                String path = fileForderPath + File.separator +friendInfo.getFriend_id()
+                        + ".jpg";
+                Glide.with(MyApplication.getContext())
+                        .load(path)
+                        .error(R.drawable.head)
+                        .into(holder.headCiv);
+            } else if (!TextUtils.isEmpty(item.getAvatar())) {
+                //下载图片，保存
+                downloadHeadImage(item.getAvatar(), friendInfo.getFriend_id(), holder.headCiv);
+            } else {
+                Glide.with(MyApplication.getContext())
+                        .load(R.drawable.head)
+                        .error(R.drawable.head)
+                        .into(holder.headCiv);
+            }
+        }else {
+            //群聊
+            if (headImageIsExist(item.getRoomId())) {
+                String path = fileForderPath + File.separator +item.getRoomId()
+                        + ".jpg";
+                Glide.with(MyApplication.getContext())
+                        .load(path)
+                        .error(R.drawable.head)
+                        .into(holder.headCiv);
+            } else if (!TextUtils.isEmpty(item.getAvatar())) {
+                //下载图片，保存
+                downloadHeadImage(item.getAvatar(),item.getRoomId(), holder.headCiv);
+            } else {
+                Glide.with(MyApplication.getContext())
+                        .load(R.drawable.head)
+                        .error(R.drawable.head)
+                        .into(holder.headCiv);
+            }
         }
+
         //昵称
         if (!TextUtils.isEmpty(item.getName()))
             holder.nickTv.setText(item.getName());
@@ -105,7 +129,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         //时间
         holder.dateTv.setText(DataUtils.times7(item.getTimestamp()));
         //未读消息数
-        int totalCount = item.getUnread() + item.getOnlineMessage();
+        int totalCount = item.getMsgNum() + item.getOnlineMessage();
         if (totalCount > 0) {
             holder.unreadTv.setText(totalCount + "");
             holder.unreadTv.setVisibility(View.VISIBLE);
@@ -136,8 +160,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 }
             });
 
-
         }
+//        int state = item.getFriendInfo().get(0).getIstop() == null ? 0 : Integer.parseInt(item.getFriendInfo().get(0).getIstop());
+//        if (state == 0) {
+//            holder.itemView.setBackgroundColor(mContext.getResources().getColor(R.color.white));
+//        } else {
+//            holder.itemView.setBackgroundColor(mContext.getResources().getColor(R.color.colorGray));
+//        }
 
     }
 
@@ -147,7 +176,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     public boolean headImageIsExist(String targetId) {
-        File headImage = new File(fileForderPath, targetId + "jpg");
+        File headImage = new File(fileForderPath, targetId + ".jpg");
         if (headImage.exists())
             return true;
         else

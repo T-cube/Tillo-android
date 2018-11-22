@@ -54,6 +54,7 @@
             android:paddingLeft="10dp"
             android:hint="请输入手机号"
             android:singleLine="true"
+            android:inputType="number"
             android:textSize="15sp"></EditText>
     </LinearLayout>
     <!--密码-->

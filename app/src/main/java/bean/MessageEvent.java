@@ -8,7 +8,7 @@ public class MessageEvent {
     private String target;//接收对象
     private String behavior;//行为
     private ChatMessage chatMessage;//消息对象
-    private String groupName, groupId;//群信息
+    private String groupName, roomId;//群信息
 
     public MessageEvent() {
     }
@@ -19,11 +19,11 @@ public class MessageEvent {
         this.chatMessage = chatMessage;
     }
 
-    public MessageEvent(String target, String behavior, String groupName, String groupId) {
+    public MessageEvent(String target, String behavior, String groupName, String roomId) {
         this.target = target;
         this.behavior = behavior;
         this.groupName = groupName;
-        this.groupId = groupId;
+        this.roomId = roomId;
     }
 
     public String getTarget() {
@@ -58,11 +58,11 @@ public class MessageEvent {
         this.groupName = groupName;
     }
 
-    public String getGroupId() {
-        return groupId;
+    public String getRoomId() {
+        return roomId;
     }
 
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 }

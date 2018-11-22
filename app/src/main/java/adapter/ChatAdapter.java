@@ -1,11 +1,9 @@
 package adapter;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
-import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.RecyclerView;
@@ -21,10 +19,10 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
@@ -33,18 +31,25 @@ import com.lzy.okgo.callback.FileCallback;
 import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.model.Progress;
 import com.lzy.okgo.model.Response;
+import com.qiniu.android.http.ResponseInfo;
+import com.qiniu.android.storage.UpCompletionHandler;
+import com.qiniu.android.storage.UpProgressHandler;
+import com.qiniu.android.storage.UploadManager;
+import com.qiniu.android.storage.UploadOptions;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.yumeng.tillo.ChatActivity;
 import com.yumeng.tillo.R;
 
+import org.json.JSONException;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Predicate;
-
 import application.MyApplication;
 import bean.ChatMessage;
 import bean.UserInfo;
@@ -55,7 +60,6 @@ import listener.OnItemClickListener;
 import listener.OnItemLongClickListener;
 import utils.AppSharePre;
 import utils.DataUtils;
-import utils.MediaPlayerManager;
 import utils.SharedDataTool;
 import utils.Utils;
 import utils.fileutil.FileUtils;
@@ -78,6 +82,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             CHAT_RECEIVE_FILE = 11, CHAT_RECEIVE_LINK = 12;
 
     private OnItemClickListener mOnItemClickListener = null;
+    private OnItemLongClickListener onItemLongClickListener = null;
     //消息列表
     private List<ChatMessage> mDatas = new ArrayList<>();
     private UserInfo userInfo;
@@ -106,10 +111,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.mContext = context;
         this.avatar = avatar;
         userInfo = AppSharePre.getPersonalInfo();
-        fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getUid();
+        fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getId();
         rxPermissions = new RxPermissions((Activity) context);
         downloadList = new HashSet<>();
-
     }
 
     public void setmDatas(List<ChatMessage> mList) {
@@ -125,6 +129,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public void setmOnItemClickListener(OnItemClickListener mOnItemClickListener) {
         this.mOnItemClickListener = mOnItemClickListener;
+    }
+
+    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
+        this.onItemLongClickListener = onItemLongClickListener;
     }
 
     @Override
@@ -178,7 +186,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case CHAT_SEND_TXT:
                 //发送文本
                 ChatTextSendHolder chatTextSendHolder = (ChatTextSendHolder) holder;
-//                chatTextSendHolder.timeTv.setText(DataUtils.times7(bean.getTimestamp()));
                 if (bean.getSendState() == 0) {
                     //发送中
                     chatTextSendHolder.loadPb.setVisibility(View.VISIBLE);
@@ -187,7 +194,25 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     //发送成功
                     chatTextSendHolder.sendErrorIv.setVisibility(View.GONE);
                     chatTextSendHolder.loadPb.setVisibility(View.GONE);
-                } else {
+                    //时间间隔是否大于5分钟，
+                    if (bean.isDisplayTime()) {
+                        chatTextSendHolder.dateTv.setVisibility(View.VISIBLE);
+                        chatTextSendHolder.dateTv.setText(bean.getDescrpiton());
+                    } else {
+                        chatTextSendHolder.dateTv.setVisibility(View.GONE);
+                    }
+                    //长按删除、复制
+                    if (onItemLongClickListener != null) {
+                        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                            @Override
+                            public boolean onLongClick(View v) {
+                                int pos = holder.getLayoutPosition();
+                                onItemLongClickListener.onItemLongClick(holder.itemView, pos);
+                                return true;
+                            }
+                        });
+                    }
+                } else if (bean.getSendState() == 2) {
                     //发送失败
                     chatTextSendHolder.sendErrorIv.setVisibility(View.VISIBLE);
                     chatTextSendHolder.loadPb.setVisibility(View.GONE);
@@ -234,9 +259,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case CHAT_SEND_IMAGE:
                 //发送图片
                 ChatImageSendHolder chatImageSendHolder = (ChatImageSendHolder) holder;
-                chatImageSendHolder.dateTv.setText("今天");
                 chatImageSendHolder.timeTv.setText(DataUtils.times7(bean.getTimestamp()));
-                if (bean.getSendState() == 2 && TextUtils.isEmpty(bean.getSourceid())) {
+                if (bean.getSendState() == 2 && TextUtils.isEmpty(bean.getSourceId())) {
                     //上传图片失败,点击重发按钮重新上传
                     chatImageSendHolder.sendErrorIv.setVisibility(View.VISIBLE);
                     chatImageSendHolder.sendErrorIv.setOnClickListener(new View.OnClickListener() {
@@ -269,6 +293,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         }
                     });
                 } else {
+                    if (bean.isDisplayTime()) {
+                        //时间间隔是否大于5分钟，
+                        chatImageSendHolder.dateTv.setText(bean.getDescrpiton());
+                        chatImageSendHolder.dateTv.setVisibility(View.VISIBLE);
+                    } else {
+                        //不显示时间分割
+                        chatImageSendHolder.dateTv.setVisibility(View.GONE);
+                    }
                     chatImageSendHolder.sendErrorIv.setVisibility(View.GONE);
                     //上传图片成功
                     if (downloadList.contains(bean.getLocal_path()) && bean.getLocal_path() != null) {
@@ -292,13 +324,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         chatImageSendHolder.imageIv.setProgress(100);
                         Glide.with(MyApplication.getContext()).load(bean.getLocal_path()).into(chatImageSendHolder.imageIv);
                     } else if (bean.getLocal_path() == null) {
-                        if (downloadList.contains(bean.getSourceid())) {
+                        if (downloadList.contains(bean.getSourceId())) {
                             //如果正在下载，忽略
 
                         } else {
-                            downloadList.add(bean.getSourceid());
+                            downloadList.add(bean.getSourceId());
                             //下载图片
-                            downloadImageFile(bean.getSourceid(), chatImageSendHolder.imageIv, bean, position);
+                            downloadImageFile(bean.getSourceId(), chatImageSendHolder.imageIv, bean, position);
                         }
                     }
 
@@ -307,30 +339,45 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         @Override
                         public void onClick(View v) {
                             //点击查看大图
-                            initDialog(bean.getImage_path(), bean.getSourceid(), bean, position);
-
+                            initDialog(bean.getImage_path(), bean.getSourceId(), bean, position);
                         }
                     });
+                    //长按删除
+                    if (onItemLongClickListener != null) {
+                        chatImageSendHolder.relativeLayout.setOnLongClickListener(new View.OnLongClickListener() {
+                            @Override
+                            public boolean onLongClick(View v) {
+                                int pos = holder.getLayoutPosition();
+                                onItemLongClickListener.onItemLongClick(chatImageSendHolder.relativeLayout, pos);
+                                return true;
+                            }
+                        });
+                    }
                 }
                 break;
             case CHAT_SEND_VOICE:
                 //发送语音
                 final ChatVoiceSendHolder chatVoiceSendHolder = (ChatVoiceSendHolder) holder;
-                chatVoiceSendHolder.dateTv.setText("今天");
+                chatVoiceSendHolder.setMessage(bean);
                 chatVoiceSendHolder.durationTv.setText(bean.getDuration() + "'");
-                if (mPosition == position) {
-                    //当前处于播放状态，点击停止播放
-                    chatVoiceSendHolder.playIv.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            MediaPlayerManager.stop();
-                            mPosition = -1;
-                            chatVoiceSendHolder.playIv.setBackgroundResource(R.drawable.voice_right3);
-                            notifyDataSetChanged();
-                        }
-                    });
+                boolean isPlaying = bean.isPlaying();
+                if (isPlaying) {
+                    AnimationDrawable voiceAnimation;
+                    chatVoiceSendHolder.playIv.setImageResource(R.drawable.send_voice_anim);
+                    voiceAnimation = (AnimationDrawable) chatVoiceSendHolder.playIv.getDrawable();
+                    voiceAnimation.start();
+//                    //当前处于播放状态，点击停止播放
+//                    chatVoiceSendHolder.playIv.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            MediaPlayerManager.stop();
+//                            mPosition = -1;
+//                            chatVoiceSendHolder.playIv.setBackgroundResource(R.drawable.voice_right3);
+//                            notifyDataSetChanged();
+//                        }
+//                    });
                 } else {
-                    chatVoiceSendHolder.playIv.setBackgroundResource(R.drawable.voice_right3);
+                    chatVoiceSendHolder.playIv.setImageResource(R.drawable.voice_right3);
                 }
                 if (bean.getSendState() == 0) {
                     //发送中
@@ -340,6 +387,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     //发送成功
                     chatVoiceSendHolder.loadPb.setVisibility(View.GONE);
                     chatVoiceSendHolder.sendErrorIv.setVisibility(View.GONE);
+                    if (bean.isDisplayTime()) {
+                        //时间间隔是否大于5分钟，
+                        chatVoiceSendHolder.dateTv.setText(bean.getDescrpiton());
+                        chatVoiceSendHolder.dateTv.setVisibility(View.VISIBLE);
+                    } else {
+                        //不显示时间分割
+                        chatVoiceSendHolder.dateTv.setVisibility(View.GONE);
+                    }
+
                 } else if (bean.getSendState() == 2) {
                     //发送失败
                     chatVoiceSendHolder.loadPb.setVisibility(View.GONE);
@@ -375,56 +431,50 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         });
                     });
                 }
-                //添加点击事件
-                chatVoiceSendHolder.contentLl.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //播放语音
-                        if (!TextUtils.isEmpty(bean.getLocal_path())) {
-                            //播放语音
-                            mPosition = position;
-                            notifyDataSetChanged();
-                            chatVoiceSendHolder.playIv.setBackgroundResource(R.drawable.send_voice_anim);
-                            AnimationDrawable animation = (AnimationDrawable) chatVoiceSendHolder.playIv.getBackground();
-                            animation.start();
-                            MediaPlayerManager.playSound(bean.getLocal_path(), new MediaPlayer.OnCompletionListener() {
-                                @Override
-                                public void onCompletion(MediaPlayer mediaPlayer) {
-                                    //播放完成，关闭动画
-                                    chatVoiceSendHolder.playIv.setBackgroundResource(R.drawable.voice_right3);
-                                    MediaPlayerManager.stop();
-                                    mPosition = -1;
-                                    notifyDataSetChanged();
-                                }
-                            });
+                //长按删除
+                if (onItemLongClickListener != null) {
+                    chatVoiceSendHolder.contentLl.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            int pos = holder.getLayoutPosition();
+                            onItemLongClickListener.onItemLongClick(chatVoiceSendHolder.contentLl, pos);
+                            return true;
                         }
-//                        else {
-//                            chatVoiceSendHolder.contentLl.setEnabled(false);
-//                            chatVoiceSendHolder.loadPb.setVisibility(View.VISIBLE);
-//                            rxPermissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-//                                    .subscribe(new io.reactivex.functions.Consumer<Boolean>() {
-//                                        @Override
-//                                        public void accept(Boolean aBoolean) throws Exception {
-//                                            //权限已经开启
-//                                            if (aBoolean) {
-//                                                downloadAudioFile(bean.getSourceid(), chatVoiceSendHolder, bean, position);
-//                                            } else {
-//                                                //未开启权限，弹出提示框
-//
-//                                            }
-//
-//
-//                                        }
-//                                    });
-//                        }
+                    });
+                }
+                if (mOnItemClickListener != null) {
+                    //点击事件
+                    chatVoiceSendHolder.contentLl.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            int pos = holder.getLayoutPosition();
+                            mOnItemClickListener.onItemClick(chatVoiceSendHolder.contentLl, pos);
+                        }
+                    });
+                }
 
-                    }
-                });
                 break;
             case CHAT_RECEIVE_TXT:
                 //接收文本信息
                 ChatTextReceivedHolder chatTextReceivedHolder = (ChatTextReceivedHolder) holder;
-                chatTextReceivedHolder.dateTv.setText("今天");
+                //发送成功
+                if (bean.isDisplayTime()) {
+                    chatTextReceivedHolder.dateTv.setVisibility(View.VISIBLE);
+                    chatTextReceivedHolder.dateTv.setText(bean.getDescrpiton());
+                } else {
+                    //不显示时间分割
+                    chatTextReceivedHolder.dateTv.setVisibility(View.GONE);
+                }
+                if (onItemLongClickListener != null) {
+                    holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            int pos = holder.getLayoutPosition();
+                            onItemLongClickListener.onItemLongClick(holder.itemView, pos);
+                            return true;
+                        }
+                    });
+                }
                 Glide.with(mContext).load(avatar).error(R.drawable.head).into(chatTextReceivedHolder.headCiv);
 //                chatTextReceivedHolder.timeTv.setText(DataUtils.times7(bean.getTimestamp()));
                 chatTextReceivedHolder.contentTv.setText(bean.getContent());
@@ -432,7 +482,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case CHAT_RECEIVE_IMAGE:
                 //接收图片
                 ChatImageReceivedHolder chatImageReceivedHolder = (ChatImageReceivedHolder) holder;
-                chatImageReceivedHolder.dateTv.setText("今天");
+                if (bean.isDisplayTime()) {
+                    //时间间隔是否大于5分钟，
+                    chatImageReceivedHolder.dateTv.setText(bean.getDescrpiton());
+                    chatImageReceivedHolder.dateTv.setVisibility(View.VISIBLE);
+                } else {
+                    //不显示时间分割
+                    chatImageReceivedHolder.dateTv.setVisibility(View.GONE);
+                }
                 chatImageReceivedHolder.timeTv.setText(DataUtils.times7(bean.getTimestamp()));
                 Glide.with(MyApplication.getContext()).load(avatar).error(R.drawable.head).into(chatImageReceivedHolder.headCiv);
                 //加载图片
@@ -441,13 +498,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     chatImageReceivedHolder.imageIv.setProgress(100);
                     Glide.with(MyApplication.getContext()).load(bean.getLocal_path()).into(chatImageReceivedHolder.imageIv);
                 } else {
-                    if (downloadList.contains(bean.getSourceid())) {
+                    if (downloadList.contains(bean.getSourceId())) {
                         //如果正在下载，忽略
 
                     } else {
-                        downloadList.add(bean.getSourceid());
+                        downloadList.add(bean.getSourceId());
                         //下载图片
-                        downloadImageFile(bean.getSourceid(), chatImageReceivedHolder.imageIv, bean, position);
+                        downloadImageFile(bean.getSourceId(), chatImageReceivedHolder.imageIv, bean, position);
                     }
                 }
 
@@ -456,35 +513,60 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     @Override
                     public void onClick(View v) {
                         //点击查看大图
-                        initDialog(bean.getImage_path(), bean.getSourceid(), bean, position);
+                        initDialog(bean.getImage_path(), bean.getSourceId(), bean, position);
 
                     }
                 });
+                //长按删除
+                if (onItemLongClickListener != null) {
+                    chatImageReceivedHolder.relativeLayout.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            int pos = holder.getLayoutPosition();
+                            onItemLongClickListener.onItemLongClick(chatImageReceivedHolder.relativeLayout, pos);
+                            return true;
+                        }
+                    });
+                }
                 break;
             case CHAT_RECEIVE_VOICE:
                 //接收语音
                 final ChatVoiceReceivedHolder chatVoiceReceivedHolder = (ChatVoiceReceivedHolder) holder;
-                chatVoiceReceivedHolder.dateTv.setText("今天");
+                chatVoiceReceivedHolder.setMessage(bean);
                 chatVoiceReceivedHolder.durationTv.setText(bean.getDuration() + "'");
-                if (mPosition == position) {
-                    chatVoiceReceivedHolder.playIv.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            //播放完成，关闭动画
-                            MediaPlayerManager.stop();
-                            mPosition = -1;
-                            chatVoiceReceivedHolder.playIv.setBackgroundResource(R.drawable.voice_left3);
-                            notifyDataSetChanged();
-                        }
-                    });
+                boolean reIsPlaying = bean.isPlaying();
+                if (reIsPlaying) {
+                    AnimationDrawable voiceAnimation;
+                    chatVoiceReceivedHolder.playIv.setImageResource(R.drawable.receive_voice_anim);
+                    voiceAnimation = (AnimationDrawable) chatVoiceReceivedHolder.playIv.getDrawable();
+                    voiceAnimation.start();
+
+//                    chatVoiceReceivedHolder.playIv.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            //播放完成，关闭动画
+//                            MediaPlayerManager.stop();
+//                            mPosition = -1;
+//                            chatVoiceReceivedHolder.playIv.setBackgroundResource(R.drawable.voice_left3);
+//                            notifyDataSetChanged();
+//                        }
+//                    });
                 } else {
-                    chatVoiceReceivedHolder.playIv.setBackgroundResource(R.drawable.voice_left3);
+                    chatVoiceReceivedHolder.playIv.setImageResource(R.drawable.voice_left3);
                 }
-                Log.e("TAG", "bean.getSendState()" + bean.getSendState());
                 if (bean.getSendState() == 0) {
                     chatVoiceReceivedHolder.loadPb.setVisibility(View.VISIBLE);
                 } else {
                     chatVoiceReceivedHolder.loadPb.setVisibility(View.GONE);
+                    if (bean.isDisplayTime()) {
+                        //时间间隔是否大于5分钟，
+                        chatVoiceReceivedHolder.dateTv.setText(bean.getDescrpiton());
+                        chatVoiceReceivedHolder.dateTv.setVisibility(View.VISIBLE);
+                    } else {
+                        //不显示时间分割
+                        chatVoiceReceivedHolder.dateTv.setVisibility(View.GONE);
+                    }
+
                 }
                 if (bean.isRead()) {
                     //已读
@@ -494,52 +576,27 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     chatVoiceReceivedHolder.unreadIv.setVisibility(View.VISIBLE);
                 }
                 Glide.with(MyApplication.getContext()).load(avatar).error(R.drawable.head).into(chatVoiceReceivedHolder.headIv);
-                //添加点击事件
-                chatVoiceReceivedHolder.contentLl.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        ChatMessage tempMsg = new ChatMessage();
-                        tempMsg.setRead(true);
-                        bean.setRead(true);
-                        tempMsg.updateAll("message_id=?", bean.getMessage_id());
-                        //播放语音
-                        if (!TextUtils.isEmpty(bean.getLocal_path())) {
-                            //播放语音
-                            mPosition = position;
-                            notifyDataSetChanged();
-                            chatVoiceReceivedHolder.playIv.setBackgroundResource(R.drawable.receive_voice_anim);
-                            AnimationDrawable animationDrawable = (AnimationDrawable) chatVoiceReceivedHolder.playIv.getBackground();
-                            animationDrawable.start();
-                            MediaPlayerManager.playSound(bean.getLocal_path(), new MediaPlayer.OnCompletionListener() {
-                                @Override
-                                public void onCompletion(MediaPlayer mediaPlayer) {
-                                    //播放完成，关闭动画
-                                    MediaPlayerManager.stop();
-                                    chatVoiceReceivedHolder.playIv.setBackgroundResource(R.drawable.voice_left3);
-                                    mPosition = -1;
-                                    notifyDataSetChanged();
-                                }
-                            });
-                        } else {
-                            //音频文件没有下载成功，重新下载
-                            chatVoiceReceivedHolder.contentLl.setEnabled(false);
-                            chatVoiceReceivedHolder.loadPb.setVisibility(View.VISIBLE);
-                            rxPermissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                                    .subscribe(new io.reactivex.functions.Consumer<Boolean>() {
-                                        @Override
-                                        public void accept(Boolean aBoolean) throws Exception {
-                                            //权限已经开启
-                                            if (aBoolean) {
-                                                downloadAudioFile(chatVoiceReceivedHolder, bean, position, bean.getFileName());
-                                            } else {
-                                                //未开启权限，弹出提示框
-
-                                            }
-                                        }
-                                    });
+                //长按删除
+                if (onItemLongClickListener != null) {
+                    chatVoiceReceivedHolder.contentLl.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            int pos = holder.getLayoutPosition();
+                            onItemLongClickListener.onItemLongClick(chatVoiceReceivedHolder.contentLl, pos);
+                            return true;
                         }
-                    }
-                });
+                    });
+                }
+                if (mOnItemClickListener != null) {
+                    //点击事件
+                    chatVoiceReceivedHolder.contentLl.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            int pos = holder.getLayoutPosition();
+                            mOnItemClickListener.onItemClick(chatVoiceReceivedHolder.contentLl, pos);
+                        }
+                    });
+                }
                 break;
 
 
@@ -559,7 +616,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         switch (mDatas.get(position).getType()) {
             case "text":
                 //文本信息
-                if (userInfo.getUid().equals(mDatas.get(position).getFrom()))
+                if (userInfo.getId().equals(mDatas.get(position).getSender()))
                     type = CHAT_SEND_TXT;
                 else
                     type = CHAT_RECEIVE_TXT;
@@ -567,35 +624,35 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 break;
             case "image":
                 //图片
-                if (userInfo.getUid().equals(mDatas.get(position).getFrom()))
+                if (userInfo.getId().equals(mDatas.get(position).getSender()))
                     type = CHAT_SEND_IMAGE;
                 else
                     type = CHAT_RECEIVE_IMAGE;
                 break;
             case "audio":
                 //语音
-                if (userInfo.getUid().equals(mDatas.get(position).getFrom()))
+                if (userInfo.getId().equals(mDatas.get(position).getSender()))
                     type = CHAT_SEND_VOICE;
                 else
                     type = CHAT_RECEIVE_VOICE;
                 break;
             case "video":
                 //视频
-                if (userInfo.getUid().equals(mDatas.get(position).getFrom()))
+                if (userInfo.getId().equals(mDatas.get(position).getSender()))
                     type = CHAT_SEND_VIDEO;
                 else
                     type = CHAT_RECEIVE_VIDEO;
                 break;
             case "file":
                 //文件
-                if (userInfo.getUid().equals(mDatas.get(position).getFrom()))
+                if (userInfo.getId().equals(mDatas.get(position).getSender()))
                     type = CHAT_SEND_FILE;
                 else
                     type = CHAT_RECEIVE_FILE;
                 break;
             case "link":
                 //链接
-                if (userInfo.getUid().equals(mDatas.get(position).getFrom()))
+                if (userInfo.getId().equals(mDatas.get(position).getSender()))
                     type = CHAT_SEND_LINK;
                 else
                     type = CHAT_RECEIVE_LINK;
@@ -609,7 +666,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
      * 发送文字 右侧
      */
     public class ChatTextSendHolder extends RecyclerView.ViewHolder {
-        private TextView dateTv, contentTv, timeTv;
+        private TextView dateTv, contentTv;
         private LinearLayout contentLl;
         ProgressBar loadPb;
         ImageView sendErrorIv;
@@ -687,11 +744,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
      * 语音发送
      */
 
-    class ChatVoiceSendHolder extends RecyclerView.ViewHolder {
+    class ChatVoiceSendHolder extends RecyclerView.ViewHolder implements PropertyChangeListener {
         private TextView dateTv, durationTv;
         private LinearLayout contentLl;
         private ProgressBar loadPb;
         private ImageView playIv, sendErrorIv;
+        private ChatMessage message;
 
         public ChatVoiceSendHolder(View itemView) {
             super(itemView);
@@ -702,17 +760,39 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             playIv = Utils.findViewsById(itemView, R.id.item_chat_right_voice_iv_play);
             sendErrorIv = Utils.findViewsById(itemView, R.id.item_chat_pb_right_failed);
         }
+
+        //将message传进来，便于赋值
+        public void setMessage(ChatMessage message) {
+            if (this.message != null)
+                this.message.removePropertyChangeListener(this);
+            this.message = message;
+            this.message.addPropertyChangeListener(this);
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            boolean isPlaying = message.isPlaying();
+            if (isPlaying) {
+                AnimationDrawable voiceAnimation;
+                playIv.setImageResource(R.drawable.send_voice_anim);
+                voiceAnimation = (AnimationDrawable) playIv.getDrawable();
+                voiceAnimation.start();
+            } else {
+                playIv.setImageResource(R.drawable.voice_right3);
+            }
+        }
     }
 
     /**
      * 语音接收
      */
-    class ChatVoiceReceivedHolder extends RecyclerView.ViewHolder {
+    class ChatVoiceReceivedHolder extends RecyclerView.ViewHolder implements PropertyChangeListener {
         private TextView dateTv, durationTv;
         private LinearLayout contentLl;
         private ProgressBar loadPb;
         private ImageView playIv, unreadIv;
         private CircleImageView headIv;
+        private ChatMessage message;
 
         public ChatVoiceReceivedHolder(View itemView) {
             super(itemView);
@@ -724,45 +804,76 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             headIv = Utils.findViewsById(itemView, R.id.item_chat_civ_head);
             unreadIv = Utils.findViewsById(itemView, R.id.item_chat_tv_unread);
         }
+
+        //将message传进来，便于赋值
+        public void setMessage(ChatMessage message) {
+            if (this.message != null)
+                this.message.removePropertyChangeListener(this);
+            this.message = message;
+            this.message.addPropertyChangeListener(this);
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if (evt.getPropertyName().equals("playing")) {
+                boolean isPlaying = message.isPlaying();
+                if (isPlaying) {
+                    AnimationDrawable voiceAnimation;
+                    playIv.setImageResource(R.drawable.receive_voice_anim);
+                    voiceAnimation = (AnimationDrawable) playIv.getDrawable();
+                    voiceAnimation.start();
+                } else {
+                    playIv.setImageResource(R.drawable.voice_left3);
+                }
+
+            } else if (evt.getPropertyName().equals("upOrDownLoad")) {
+                boolean isDownload = message.isUpOrDownLoad();
+                if (isDownload) {
+                    loadPb.setVisibility(View.VISIBLE);
+                } else {
+                    loadPb.setVisibility(View.GONE);
+                }
+            }
+        }
     }
 
 
-    //下载音频文件
-    public void downloadAudioFile(final ChatVoiceReceivedHolder holder, final ChatMessage message, final int position, String fileName) {
-        OkGo.<File>get(Constants.TSHION_URL + Constants.downloadFile + message.getSourceid())
-                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
-                .execute(new FileCallback(fileForderPath, fileName) {
-                    @Override
-                    public void onSuccess(Response<File> response) {
-                        File file = response.body();
-                        //保存文件
-                        ChatMessage item = new ChatMessage();
-                        item.setLocal_path(file.getAbsolutePath());
-                        item.setSourceid(message.getSourceid());
-                        item.setTimestamp(message.getTimestamp());
-                        item.setRoomid(message.getRoomid());
-                        item.setTarget(message.getTarget());
-                        item.setFrom(message.getFrom());
-                        item.setMessage_id(message.getMessage_id());
-                        item.setDuration(message.getDuration());
-                        item.setType(message.getType());
-                        item.setContent(message.getContent());
-                        item.setMsg_id(message.getMsg_id());
-                        item.setSendState(1);
-                        message.setLocal_path(file.getAbsolutePath());
-                        mDatas.set(position, message);
-                        boolean isSave = item.saveOrUpdate("message_id=?", message.getMessage_id());
-                        holder.contentLl.setEnabled(true);
-                        notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void onError(Response<File> response) {
-                        holder.contentLl.setEnabled(false);
-                        notifyDataSetChanged();
-                    }
-                });
-    }
+//    //下载音频文件
+//    public void downloadAudioFile(final ChatVoiceReceivedHolder holder, final ChatMessage message, final int position, String fileName) {
+//        OkGo.<File>get(Constants.TSHION_URL + Constants.downloadFile + message.getSourceid())
+//                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
+//                .execute(new FileCallback(fileForderPath, fileName) {
+//                    @Override
+//                    public void onSuccess(Response<File> response) {
+//                        File file = response.body();
+//                        //保存文件
+//                        ChatMessage item = new ChatMessage();
+//                        item.setLocal_path(file.getAbsolutePath());
+//                        item.setSourceid(message.getSourceid());
+//                        item.setTimestamp(message.getTimestamp());
+//                        item.setRoomid(message.getRoomid());
+//                        item.setTarget(message.getTarget());
+//                        item.setFrom(message.getFrom());
+//                        item.setMessage_id(message.getMessage_id());
+//                        item.setDuration(message.getDuration());
+//                        item.setType(message.getType());
+//                        item.setContent(message.getContent());
+//                        item.setMsg_id(message.getMsg_id());
+//                        item.setSendState(1);
+//                        message.setLocal_path(file.getAbsolutePath());
+//                        mDatas.set(position, message);
+//                        boolean isSave = item.saveOrUpdate("message_id=?", message.getMessage_id());
+//                        holder.contentLl.setEnabled(true);
+//                        notifyDataSetChanged();
+//                    }
+//
+//                    @Override
+//                    public void onError(Response<File> response) {
+//                        holder.contentLl.setEnabled(false);
+//                        notifyDataSetChanged();
+//                    }
+//                });
+//    }
 
     //上传图片
     public void uploadImage(final ChatMessage message, ProcessImageView processImageView, final int position, ImageView errorIv, ReSendMessageCallback callback) {
@@ -770,50 +881,68 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         mDatas.set(position, message);
         final File file = new File(message.getLocal_path());
         boolean hasNetWork = SharedDataTool.getBoolean(mContext, "network");
-        if (hasNetWork) {
-            OkGo.<String>post(Constants.TSHION_URL + Constants.uploadFile)
-                    .headers("Authorization", "Bearer " + userInfo.getAccess_token())
-                    .params("file", file)
-                    .execute(new StringCallback() {
-                        @Override
-                        public void onSuccess(Response<String> response) {
-                            errorIv.setVisibility(View.GONE);
-                            com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(response.body());
-                            int status = jsonObject.getIntValue("status");
-                            com.alibaba.fastjson.JSONObject dataJson = jsonObject.getJSONObject("data");
-                            if (status == 200) {
-                                String url = dataJson.getString("_id");
-                                message.setUpOrDownLoad(false);
-                                message.setSourceid(url);
-                                mDatas.set(position, message);
-                                downloadList.remove(message.getLocal_path());
-                                ChatActivity chatActivity = (ChatActivity) mContext;
-                                chatActivity.sendImageMessage(position, message, file.getName(), callback);
-                            }
-                        }
+        OkGo.<String>get(Constants.BaseUrl + "/getToken")
+                .headers("Authorization", userInfo.getToken())
+                .execute(new StringCallback() {
+                    @Override
+                    public void onSuccess(Response<String> response) {
+                        Log.e("TAG_getQiNiu", response.body());
+                        JSONObject jsonObject = JSON.parseObject(response.body());
+                        JSONObject dataObject = JSON.parseObject(jsonObject.getString("data"));
+                        String token = dataObject.getString("token");
+                        uploadImageToQiNiu(message.getBackId(), token, file, message, processImageView, position, errorIv, callback);
+                    }
 
-                        @Override
-                        public void uploadProgress(Progress progress) {
-                            int percent = (int) (progress.currentSize / progress.totalSize) * 100;
-                            processImageView.setProgress(percent);
-                        }
+                    @Override
+                    public void onError(Response<String> response) {
+                        super.onError(response);
+                        Log.e("TAG_qiNiuError", response.getException().getMessage());
+                        errorIv.setVisibility(View.VISIBLE);
+                        message.setUpOrDownLoad(false);
+                        message.setSendState(2);
+                        mDatas.set(position, message);
+                    }
+                });
 
-                        @Override
-                        public void onError(Response<String> response) {
-                            super.onError(response);
-                            Log.e("TAG", "upload Failed!");
-                            errorIv.setVisibility(View.VISIBLE);
-                            message.setUpOrDownLoad(false);
-                            message.setSendState(2);
-                            mDatas.set(position, message);
-                        }
-                    });
-        } else {
-            errorIv.setVisibility(View.VISIBLE);
-            message.setUpOrDownLoad(false);
-            message.setSendState(2);
-            mDatas.set(position, message);
-        }
+    }
+
+    //上传图片到七牛云
+    public void uploadImageToQiNiu(String fileName, String qiNiuToken, File file, ChatMessage message, ProcessImageView processImageView, final int position, ImageView errorIv, ReSendMessageCallback callback) {
+        UploadManager uploadManager = new UploadManager();
+        uploadManager.put(file, fileName, qiNiuToken, new UpCompletionHandler() {
+            @Override
+            public void complete(String key, ResponseInfo info, org.json.JSONObject response) {
+                if (info.isOK()) {
+                    Log.e("qiniu", "Upload Success" + response.toString());
+                    try {
+                        String hash = response.getString("hash");
+                        long size = info.totalSize;
+                        message.setUpOrDownLoad(false);
+                        mDatas.set(position, message);
+                        downloadList.remove(message.getLocal_path());
+                        ChatActivity chatActivity = (ChatActivity) mContext;
+                        chatActivity.sendImageMessage(position, message, key, hash, size, callback);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    //如果失败，这里可以把info信息上报自己的服务器，便于后面分析上传错误原因
+                    errorIv.setVisibility(View.VISIBLE);
+                    message.setUpOrDownLoad(false);
+                    message.setSendState(2);
+                    mDatas.set(position, message);
+                }
+
+            }
+
+        }, new UploadOptions(null, null, false, new UpProgressHandler() {
+            @Override
+            public void progress(String key, double percent) {
+                Log.e("TAG_progress","percent"+percent);
+                int progress = (int) (percent * 100);
+                processImageView.setProgress(progress);
+            }
+        }, null));
     }
 
     //下载缩略图
@@ -821,10 +950,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final String fileName = generateImageFileName();
         message.setUpOrDownLoad(true);
         mDatas.set(position, message);
-        OkGo.<File>get(Constants.TSHION_URL + Constants.getThumbnail + "/" + url)
-                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
-                .params("w", 300 + "")
-                .params("h", 200 + "")
+        OkGo.<File>get(Constants.FileUrl + Constants.downloadFile)
+                .headers("Authorization",userInfo.getToken())
+                .params("sourceId",url)
+                .params("type",1)
                 .execute(new FileCallback(fileForderPath, fileName) {
                     @Override
                     public void onSuccess(Response<File> response) {
@@ -832,12 +961,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         //保存文件
                         ChatMessage item = new ChatMessage();
                         item.setLocal_path(file.getAbsolutePath());
-                        item.setSourceid(message.getSourceid());
+                        item.setSourceId(message.getSourceId());
                         item.setTimestamp(message.getTimestamp());
                         item.setRoomid(message.getRoomid());
-                        item.setTarget(message.getTarget());
-                        item.setFrom(message.getFrom());
-                        item.setMessage_id(message.getMessage_id());
+                        item.setReceiver(message.getReceiver());
+                        item.setSender(message.getSender());
+                        item.setMessageId(message.getMessageId());
                         item.setType(message.getType());
                         item.setContent(message.getContent());
                         message.setLocal_path(file.getAbsolutePath());
@@ -868,8 +997,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final String fileName = generateImageFileName();
         message.setUpOrDownLoad(true);
         mDatas.set(position, message);
-        OkGo.<File>get(Constants.TSHION_URL + Constants.getImage + "/" + url)
-                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
+        OkGo.<File>get(Constants.FileUrl + Constants.downloadFile)
+                .headers("Authorization", userInfo.getToken())
+                .params("sourceId",url)
                 .execute(new FileCallback(fileForderPath, fileName) {
                     @Override
                     public void onSuccess(Response<File> response) {
@@ -879,12 +1009,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         ChatMessage item = new ChatMessage();
                         item.setImage_path(file.getAbsolutePath());
                         item.setLocal_path(message.getLocal_path());
-                        item.setSourceid(message.getSourceid());
+                        item.setSourceId(message.getSourceId());
                         item.setTimestamp(message.getTimestamp());
                         item.setRoomid(message.getRoomid());
-                        item.setTarget(message.getTarget());
-                        item.setFrom(message.getFrom());
-                        item.setMessage_id(message.getMessage_id());
+                        item.setReceiver(message.getReceiver());
+                        item.setSender(message.getSender());
+                        item.setMessageId(message.getMessageId());
                         item.setType(message.getType());
                         item.setContent(message.getContent());
                         message.setLocal_path(file.getAbsolutePath());
@@ -955,33 +1085,90 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final File file = new File(chatMessage.getLocal_path());
         boolean hasNetWork = SharedDataTool.getBoolean(mContext, "network");
         if (hasNetWork) {
-            OkGo.<String>post(Constants.TSHION_URL + Constants.uploadFile)
-                    .headers("Authorization", "Bearer " + userInfo.getAccess_token())
-                    .params("file", file)
+            OkGo.<String>get(Constants.BaseUrl + "/getToken")
+                    .headers("Authorization", userInfo.getToken())
                     .execute(new StringCallback() {
                         @Override
                         public void onSuccess(Response<String> response) {
+                            Log.e("TAG", response.body());
                             com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(response.body());
-                            com.alibaba.fastjson.JSONObject dataJson = jsonObject.getJSONObject("data");
-                            String url = dataJson.getString("_id");
-                            ChatMessage item = new ChatMessage();
-                            item.setSourceid(url);
-                            item.setSendState(0);
-                            int result = item.updateAll("msg_id=?", chatMessage.getMsg_id());
-                            //重新发送语音消息
-                            ChatActivity chatActivity = (ChatActivity) mContext;
-                            chatActivity.reSendVoiceMessage(chatMessage, position, callback);
+                            com.alibaba.fastjson.JSONObject dataObject = JSON.parseObject(jsonObject.getString("data"));
+                            String token = dataObject.getString("token");
+                            uploadAudioToQiNiu( chatMessage.getBackId(), token, file, chatMessage, position,callback);
                         }
 
                         @Override
                         public void onError(Response<String> response) {
                             super.onError(response);
+                            Log.e("TAG", response.getException().getMessage());
                         }
                     });
         } else {
             errorIv.setVisibility(View.VISIBLE);
             loadPb.setVisibility(View.GONE);
         }
+    }
+
+    /*
+       *计算time2减去time1的差值 差值只设置 几天 几个小时 或 几分钟
+       * 根据差值返回多长之间前或多长时间后
+       * */
+    public boolean isDisplayTime(long time1, long time2) {
+        long day = 0;
+        long hour = 0;
+        long min = 0;
+        long sec = 0;
+        long diff;
+        String flag;
+        if (time1 < time2) {
+            diff = time2 - time1;
+            flag = "前";
+        } else {
+            diff = time1 - time2;
+            flag = "后";
+        }
+        day = diff / (24 * 60 * 60 * 1000);
+        hour = (diff / (60 * 60 * 1000) - day * 24);
+        min = ((diff / (60 * 1000)) - day * 24 * 60 - hour * 60);
+        sec = (diff / 1000 - day * 24 * 60 * 60 - hour * 60 * 60 - min * 60);
+        Log.e("DATE", "day:" + day + "hour:" + hour + "min:" + min + "sec:" + sec);
+        if (day != 0)
+            return true;
+        if (hour != 0)
+            return true;
+        if (min >= 5)
+            return true;
+        return false;
+    }
+
+
+    //上传图片到七牛云
+    public void uploadAudioToQiNiu(String fileName, String qiNiuToken, File file, ChatMessage message, int position, ReSendMessageCallback callback ) {
+        UploadManager uploadManager = new UploadManager();
+        uploadManager.put(file, fileName, qiNiuToken, new UpCompletionHandler() {
+            @Override
+            public void complete(String key, ResponseInfo info, org.json.JSONObject response) {
+                if (info.isOK()) {
+                    Log.e("qiniu", "Upload Success" + response.toString());
+                    try {
+                        String hash = response.getString("hash");
+                        long size = info.totalSize;
+                        ChatActivity chatActivity = (ChatActivity) mContext;
+                        chatActivity.reSendVoiceMessage(message, position, callback,hash,size);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+
+                }
+
+            }
+
+        }, new UploadOptions(null, null, false, new UpProgressHandler() {
+            @Override
+            public void progress(String key, double percent) {
+            }
+        }, null));
     }
 
 

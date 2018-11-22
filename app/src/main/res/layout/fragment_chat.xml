@@ -17,30 +17,78 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <RelativeLayout
+        <!--<RelativeLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="48dp"-->
+            <!--android:background="@color/white">-->
+
+            <!--<View-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="1dp"-->
+                <!--android:layout_alignParentBottom="true"-->
+                <!--android:background="#FFCCCCCC" />-->
+
+            <!--<com.flyco.tablayout.SlidingTabLayout-->
+                <!--android:id="@+id/chat_tl_tab"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="48dp"-->
+                <!--android:layout_marginTop="6dp"-->
+                <!--android:background="@color/transparent"-->
+                <!--app:tl_indicator_color="#FF518FFF"-->
+                <!--app:tl_indicator_height="1dp"-->
+                <!--app:tl_tab_space_equal="true"-->
+                <!--app:tl_textSelectColor="#FF518FFF"-->
+                <!--app:tl_textUnselectColor="#FF999999"></com.flyco.tablayout.SlidingTabLayout>-->
+
+
+        <!--</RelativeLayout>-->
+
+        <LinearLayout
+            android:id="@+id/chat_tl_ll_bar"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@color/white">
+            android:layout_height="41dp"
+            android:visibility="gone"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/chat_tl_iv_error"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:src="@drawable/send_failed"
+                        android:visibility="gone" />
+
+                    <ProgressBar
+                        android:id="@+id/chat_tl_pb_progress"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp" />
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/chat_tl_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="连接中..."
+                    android:textColor="@color/colorBlack"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_alignParentBottom="true"
                 android:background="#FFCCCCCC" />
-
-            <android.support.design.widget.TabLayout
-                android:id="@+id/chat_tl_tab"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="6dp"
-                android:background="@color/transparent"
-                app:tabIndicatorColor="#FF518FFF"
-                app:tabIndicatorHeight="1dp"
-                app:tabSelectedTextColor="#FF518FFF"
-                app:tabTextColor="#FF999999"></android.support.design.widget.TabLayout>
-
-
-        </RelativeLayout>
+        </LinearLayout>
 
         <android.support.v4.view.ViewPager
             android:id="@+id/chat_vp_pager"

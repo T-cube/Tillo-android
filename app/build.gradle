@@ -1,19 +1,64 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 27
+    sourceSets.main {
+        jniLibs.srcDir 'libs'
+        jni.srcDirs = [] //disable automatic ndk-build call
+    }
+
+
+//    lintOptions {
+//        checkReleaseBuilds false
+//        // Or, if you prefer, you can continue to check for errors in release builds,
+//        // but continue the build even when errors are found:
+//        abortOnError false
+//    }
+
+
+
+
     defaultConfig {
         applicationId "com.yumeng.tillo"
+        multiDexEnabled true
         minSdkVersion 21
-        targetSdkVersion 25
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk {
+            //根据需要 自行选择添加的对应cpu类型的.so库。
+            abiFilters 'armeabi', 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            // 还可以添加 'x86', 'x86_64', 'mips', 'mips64'
+        }
+        manifestPlaceholders = [
+                PACKAGE_NAME:"com.yumeng.tillo",
+                HW_APPID: "100438803",
+                XG_ACCESS_ID : "2100314079",
+                XG_ACCESS_KEY: "A7WKT4C543DN",
+        ]
     }
+
+    //必须先声明再使用
+    signingConfigs {
+        release {
+            //加载资源
+            Properties properties = new Properties()
+            InputStream inputStream = project.rootProject.file('signing.properties').newDataInputStream()
+            properties.load(inputStream)
+            storeFile file(properties.getProperty('keystore_storeFile'))
+            storePassword properties.getProperty('keystore_storePassword')
+            keyAlias properties.getProperty('keystore_keyAlias')
+            keyPassword properties.getProperty('keystore_keyPassword')
+        }
+
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
@@ -24,46 +69,69 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:25.3.1'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
     testImplementation 'junit:junit:4.12'
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:design:25.3.1'
+    implementation 'com.android.support:design:27.1.1'
     //json解析
-    compile 'com.alibaba:fastjson:1.2.14'
+    implementation 'com.alibaba:fastjson:1.2.14'
     //dex分包
-    compile 'com.android.support:multidex:1.0.0'
-    compile 'com.android.support:cardview-v7:25.3.1'
+    implementation 'com.android.support:cardview-v7:27.1.1'
     //圆形头像
-    compile 'de.hdodenhof:circleimageview:2.2.0'
-    compile project(':library')
-    compile project(':matisse')
+    implementation 'de.hdodenhof:circleimageview:2.2.0'
+    implementation project(':library')
+    implementation project(':matisse')
     //角标
-    compile 'q.rorbin:badgeview:1.1.3'
-    compile 'com.nineoldandroids:library:2.4.0'
-    compile 'com.flyco.roundview:FlycoRoundView_Lib:1.1.2@aar'
-    compile 'com.flyco.tablayout:FlycoTabLayout_Lib:1.5.0@aar'
-    compile 'com.kyleduo.switchbutton:library:2.0.0'
+    implementation 'q.rorbin:badgeview:1.1.3'
+    implementation 'com.nineoldandroids:library:2.4.0'
+    implementation 'com.flyco.roundview:FlycoRoundView_Lib:1.1.2@aar'
+    implementation 'com.flyco.tablayout:FlycoTabLayout_Lib:1.5.0@aar'
+    implementation 'com.kyleduo.switchbutton:library:2.0.0'
     //下拉刷新控件
-    compile 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0-alpha-2'
+    implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0-alpha-2'
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
     //okGo
-    compile 'com.lzy.net:okgo:3.0.4'
+    implementation 'com.lzy.net:okgo:3.0.4'
     //图片框架
-    compile 'com.github.bumptech.glide:glide:3.7.0'
-    compile 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.4@aar'
-    compile 'io.reactivex.rxjava2:rxjava:2.0.1'
-    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    compile 'com.isseiaoki:simplecropview:1.1.4'
-    compile 'org.litepal.android:core:1.6.1'
-    compile 'org.apache.httpcomponents:httpcore:4.4.4'
-    compile 'org.greenrobot:eventbus:3.1.1'
-    compile('io.socket:socket.io-client:0.8.3') {
+    implementation 'com.github.bumptech.glide:glide:3.7.0'
+    implementation 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.4@aar'
+    implementation 'io.reactivex.rxjava2:rxjava:2.0.1'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    implementation 'com.isseiaoki:simplecropview:1.1.4'
+    implementation 'org.litepal.android:core:1.6.1'
+    implementation 'org.apache.httpcomponents:httpcore:4.4.4'
+    implementation 'org.greenrobot:eventbus:3.1.1'
+    implementation 'com.flyco.dialog:FlycoDialog_Lib:1.3.2@aar'
+    //信鸽jar，不包含厂商通道
+        implementation 'com.tencent.xinge:xinge:3.2.6-release'
+    //jg包
+    implementation 'com.tencent.jg:jg:1.1'
+    //wup包
+    implementation 'com.tencent.wup:wup:1.0.0.E-release'
+    //mid包
+    implementation 'com.tencent.mid:mid:4.0.6-release'
+//    /* 华为 3.2.6-release版
+//    * 注意：若华为通道使用此版本,则信鸽sdk版本也需要同时使用v3.2.6-release
+//    */
+    implementation 'com.tencent.xinge:xghw:3.2.6-release'
+//    /* 小米3.2.6-release版
+//      * 注意：若小米通道使用此版本,则信鸽sdk版本也需要同时使用v3.2.6-release
+//    */
+    implementation 'com.tencent.xinge:mipush:3.2.6-release'
+    //七牛sdk
+    implementation 'com.qiniu:qiniu-android-sdk:7.3.+'
+    implementation 'com.android.support:multidex:1.0.1'
+    implementation files('libs/audio_device_java.jar')
+    implementation files('libs/autobanh.jar')
+    implementation files('libs/base_java.jar')
+    implementation files('libs/libjingle_peerconnection.jar')
+    implementation('io.socket:socket.io-client:0.8.3') {
         exclude group: 'org.json', module: 'json'
     }
     implementation files('libs/pinyin4j-2.5.0.jar')
-
+    implementation files('libs/mpush-client-java-0.0.6.jar')
 }

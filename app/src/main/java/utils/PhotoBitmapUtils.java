@@ -69,7 +69,7 @@ public class PhotoBitmapUtils {
     public static String getPhotoFileName(Context context) {
 
         UserInfo userInfo = AppSharePre.getPersonalInfo();
-        String fileForderPath = utils.fileutil.FileUtils.getSDPath() + File.separator + userInfo.getUid();
+        String fileForderPath = utils.fileutil.FileUtils.getSDPath() + File.separator + userInfo.getId();
         boolean makeFolderState = utils.fileutil.FileUtils.makeFolders(fileForderPath);
         File cameraFile = new File(fileForderPath, generateFileName());
         return cameraFile.getAbsolutePath();
@@ -82,9 +82,9 @@ public class PhotoBitmapUtils {
      */
     public static String getUserSaveImageName(Context context) {
         UserInfo userInfo = AppSharePre.getPersonalInfo();
-        String fileForderPath = utils.fileutil.FileUtils.getSDPath() + File.separator + userInfo.getUid();
+        String fileForderPath = utils.fileutil.FileUtils.getSDPath() + File.separator + userInfo.getId();
         boolean makeFolderState = utils.fileutil.FileUtils.makeFolders(fileForderPath);
-        File cameraFile = new File(fileForderPath, userInfo.getUid() + ".jpg");
+        File cameraFile = new File(fileForderPath, userInfo.getId() + ".jpg");
         return cameraFile.getAbsolutePath();
     }
 

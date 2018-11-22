@@ -2,6 +2,7 @@ package bean;
 
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -21,7 +22,7 @@ public class FriendInfo extends DataSupport implements Serializable {
     private String pinyin;
     //拼音首字母
     private String headerWord;
-    @JSONField(name = "_id")
+    @JSONField(name = "id")
     private String friend_id;
     private String email;
     private String mobile;
@@ -29,13 +30,31 @@ public class FriendInfo extends DataSupport implements Serializable {
     private String avatar;
     private String nickname;
     private String user;
-    private String showname;
+    private String showName;
     @Column(unique = true)
-    private String roomid;
-    //    public AddressBookBean() {
-//        this.pinyin = PinYinUtils.getPinyin(showname);
-//        headerWord = pinyin.substring(0, 1);
-//    }
+    private String roomId;
+    private String istop;//0、不置顶 1、置顶
+    private String isshield;//0、不屏蔽 1、屏蔽
+    @Column(ignore = true)
+    private Setting settings;
+    private String block;
+    private String not_disturb;
+
+    public String getBlock() {
+        return block;
+    }
+
+    public void setBlock(String block) {
+        this.block = block;
+    }
+
+    public String getNot_disturb() {
+        return not_disturb;
+    }
+
+    public void setNot_disturb(String not_disturb) {
+        this.not_disturb = not_disturb;
+    }
 
     public String getFriend_id() {
         return friend_id;
@@ -44,7 +63,6 @@ public class FriendInfo extends DataSupport implements Serializable {
     public void setFriend_id(String friend_id) {
         this.friend_id = friend_id;
     }
-
 
 
     public String getName() {
@@ -57,15 +75,17 @@ public class FriendInfo extends DataSupport implements Serializable {
 
     public String getHeaderWord() {
         if (TextUtils.isEmpty(pinyin)) {
-            this.pinyin = PinYinUtils.getPinyin(showname);
+            this.pinyin = PinYinUtils.getPinyin(showName);
         }
         headerWord = pinyin.substring(0, 1).toUpperCase();
         return headerWord;
     }
+
     public String getPinyin() {
-        this.pinyin = PinYinUtils.getPinyin(showname);
+        this.pinyin = PinYinUtils.getPinyin(showName);
         return pinyin;
     }
+
     public void setPinyin(String pinyin) {
         this.pinyin = pinyin;
     }
@@ -115,18 +135,46 @@ public class FriendInfo extends DataSupport implements Serializable {
     }
 
     public String getShowname() {
-        return showname;
+        return showName;
     }
 
     public void setShowname(String showname) {
-        this.showname = showname;
+        this.showName = showname;
     }
 
-    public String getRoomid() {
-        return roomid;
+    public String getRoomId() {
+        return roomId;
     }
 
-    public void setRoomid(String roomid) {
-        this.roomid = roomid;
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
+    }
+
+    public String getIstop() {
+        return istop;
+    }
+
+    public void setIstop(String istop) {
+        this.istop = istop;
+    }
+
+    public String getIsshield() {
+        return isshield;
+    }
+
+    public void setIsshield(String isshield) {
+        this.isshield = isshield;
+    }
+
+    public Setting getSettings() {
+        return settings;
+    }
+
+    public void setSettings(Setting settings) {
+        this.settings = settings;
+    }
+
+    public void friendToString() {
+        Log.e("TAG_friendToString", "friend_id" + friend_id + "showname" + showName + "mobile" + mobile+"roomid"+roomId);
     }
 }

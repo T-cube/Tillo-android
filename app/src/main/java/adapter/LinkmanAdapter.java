@@ -42,7 +42,7 @@ public class LinkmanAdapter extends RecyclerView.Adapter<LinkmanAdapter.ViewHold
         this.context = context;
         mInflater = LayoutInflater.from(context);
         userInfo = AppSharePre.getPersonalInfo();
-        fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getUid();
+        fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getId();
         boolean makeFolderState = FileUtils.makeFolders(fileForderPath);
     }
 
@@ -94,7 +94,7 @@ public class LinkmanAdapter extends RecyclerView.Adapter<LinkmanAdapter.ViewHold
     public void downloadHeadImage(String avatar, String targetId, CircleImageView imageView) {
         if (TextUtils.isEmpty(avatar))
             return;
-        String fileForderPath = utils.fileutil.FileUtils.getSDPath() + File.separator + userInfo.getUid();
+        String fileForderPath = utils.fileutil.FileUtils.getSDPath() + File.separator + userInfo.getId();
         boolean makeFolderState = utils.fileutil.FileUtils.makeFolders(fileForderPath);
         OkGo.<File>get(avatar)
                 .execute(new FileCallback(fileForderPath, targetId + ".jpg") {

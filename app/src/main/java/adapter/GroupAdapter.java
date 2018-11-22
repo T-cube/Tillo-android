@@ -47,14 +47,19 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
     private String fileForderPath;
     private Handler handler = new Handler();
     private OnItemClickListener onItemClickListener = null;
+    private OnItemLongClickListener onItemLongClickListener = null;
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
 
+    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
+        this.onItemLongClickListener = onItemLongClickListener;
+    }
+
     public GroupAdapter(Context context) {
         userInfo = AppSharePre.getPersonalInfo();
-        fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getUid();
+        fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getId();
         this.mContext = context;
         mList = new ArrayList<>();
     }
@@ -81,30 +86,30 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
         if (!TextUtils.isEmpty(item.getName()))
             holder.nickTv.setText(item.getName());
         //未读消息
-        int totalCount = item.getOnlineMessage() + item.getOnlineMessage();
-        if (totalCount > 0) {
-            holder.unreadTv.setVisibility(View.VISIBLE);
-            holder.unreadTv.setText(totalCount + "");
-        } else {
-            holder.unreadTv.setVisibility(View.GONE);
-        }
-        //消息
-        if (!TextUtils.isEmpty(item.getContent()))
-            holder.contentTv.setText(item.getContent());
-        else {
-            holder.unreadTv.setVisibility(View.GONE);
-        }
-        //群头像
-        if (headImageIsExist(item.getGroup_id())) {
-            Glide.with(MyApplication.getContext())
-                    .load(senderImagePath(item.getGroup_id()))
-                    .error(R.drawable.head)
-                    .into(holder.headCiv);
-        } else {
-            if (!TextUtils.isEmpty(item.getAvatar())) {
-                downloadHeadImage(item, holder.headCiv);
-            }
-        }
+//        int totalCount = item.getOffline_count() + item.getOnlineMessage();
+//        if (totalCount > 0) {
+//            holder.unreadTv.setVisibility(View.VISIBLE);
+//            holder.unreadTv.setText(totalCount + "");
+//        } else {
+//            holder.unreadTv.setVisibility(View.GONE);
+//        }
+//        //消息
+//        if (!TextUtils.isEmpty(item.getContent()))
+//            holder.contentTv.setText(item.getContent());
+//        else {
+//            holder.unreadTv.setVisibility(View.GONE);
+//        }
+//        //群头像
+//        if (headImageIsExist(item.getGroup_id())) {
+//            Glide.with(MyApplication.getContext())
+//                    .load(senderImagePath(item.getGroup_id()))
+//                    .error(R.drawable.head)
+//                    .into(holder.headCiv);
+//        } else {
+//            if (!TextUtils.isEmpty(item.getAvatar())) {
+//                downloadHeadImage(item, holder.headCiv);
+//            }
+//        }
 
         //添加点击事件
         if (onItemClickListener != null) {
@@ -121,6 +126,25 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
                 }
             });
         }
+        if (onItemLongClickListener != null) {
+            //长按删除
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    int pos = holder.getLayoutPosition();
+                    onItemLongClickListener.onItemLongClick(holder.itemView, pos);
+                    return true;
+                }
+            });
+
+        }
+        int state = item.getIsTop() == null ? 0 : Integer.parseInt(item.getIsTop());
+        if (state == 0) {
+            holder.itemView.setBackgroundColor(mContext.getResources().getColor(R.color.white));
+        } else {
+            holder.itemView.setBackgroundColor(mContext.getResources().getColor(R.color.colorGray));
+        }
+
     }
 
     @Override
@@ -157,33 +181,33 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
         return fileForderPath + File.separator + targetId + ".jpg";
     }
 
-    //下载头像
-    public void downloadHeadImage(GroupInfo groupInfo, CircleImageView headCiv) {
-        if (TextUtils.isEmpty(groupInfo.getAvatar()))
-            return;
-        boolean makeFolderState = utils.fileutil.FileUtils.makeFolders(fileForderPath);
-        File cameraFile = new File(fileForderPath, groupInfo.getGroup_id() + ".jpg");
-        OkGo.<File>get(groupInfo.getAvatar())
-                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
-                .execute(new FileCallback(fileForderPath, groupInfo.getGroup_id() + ".jpg") {
-                    @Override
-                    public void onSuccess(Response<File> response) {
-                        File file = response.body();
-                        String imagePath = file.getAbsolutePath();
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                Glide.with(MyApplication.getContext())
-                                        .load(imagePath)
-                                        .error(R.drawable.head)
-                                        .into(headCiv);
-                            }
-                        }, 200);
-                    }
-
-                    @Override
-                    public void onError(Response<File> response) {
-                    }
-                });
-    }
+//    //下载头像
+//    public void downloadHeadImage(GroupInfo groupInfo, CircleImageView headCiv) {
+//        if (TextUtils.isEmpty(groupInfo.getAvatar()))
+//            return;
+//        boolean makeFolderState = utils.fileutil.FileUtils.makeFolders(fileForderPath);
+//        File cameraFile = new File(fileForderPath, groupInfo.getGroup_id() + ".jpg");
+//        OkGo.<File>get(groupInfo.getAvatar())
+//                .headers("Authorization", "Bearer " + userInfo.getToken())
+//                .execute(new FileCallback(fileForderPath, groupInfo.getGroup_id() + ".jpg") {
+//                    @Override
+//                    public void onSuccess(Response<File> response) {
+//                        File file = response.body();
+//                        String imagePath = file.getAbsolutePath();
+//                        handler.postDelayed(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                Glide.with(MyApplication.getContext())
+//                                        .load(imagePath)
+//                                        .error(R.drawable.head)
+//                                        .into(headCiv);
+//                            }
+//                        }, 200);
+//                    }
+//
+//                    @Override
+//                    public void onError(Response<File> response) {
+//                    }
+//                });
+//    }
 }

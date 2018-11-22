@@ -43,7 +43,7 @@ public final class Matisse {
         this(fragment.getActivity(), fragment);
     }
 
-    private Matisse(Activity activity, Fragment fragment) {
+    public Matisse(Activity activity, Fragment fragment) {
         mContext = new WeakReference<>(activity);
         mFragment = new WeakReference<>(fragment);
     }

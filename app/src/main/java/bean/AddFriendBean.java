@@ -13,6 +13,7 @@ public class AddFriendBean implements Serializable {
     private String name;//用户名
     private String avatar;//头像
     private String sex;//性别
+    private String roomId;//房间号
 
     public String get_id() {
         return _id;
@@ -60,5 +61,13 @@ public class AddFriendBean implements Serializable {
 
     public void setSex(String sex) {
         this.sex = sex;
+    }
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 }

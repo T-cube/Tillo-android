@@ -3,6 +3,7 @@ package adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,8 @@ import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.model.Response;
 import com.yumeng.tillo.R;
+
+import org.json.JSONException;
 
 import java.util.List;
 
@@ -76,11 +79,11 @@ public class VerifyInfoAdapter extends BaseAdapter {
             //昵称
             holder.nickTv = Utils.findViewsById(convertView, R.id.item_adf_tv_nick);
             //备注
-            holder.contentTv=Utils.findViewsById(convertView,R.id.item_adf_tv_remark);
+            holder.contentTv = Utils.findViewsById(convertView, R.id.item_adf_tv_remark);
             //状态
             holder.stateTv = Utils.findViewsById(convertView, R.id.item_adf_tv_state);
             //同意
-            holder.addFriendTv=Utils.findViewsById(convertView,R.id.item_adf_bt_add);
+            holder.addFriendTv = Utils.findViewsById(convertView, R.id.item_adf_bt_add);
             convertView.setTag(holder);
         } else {
             holder = (VerifyHolder) convertView.getTag();
@@ -95,40 +98,49 @@ public class VerifyInfoAdapter extends BaseAdapter {
         //手机号
 //        holder.phoneTv.setText();
         //备注
-        if (!TextUtils.isEmpty(bean.getMark()))
-            holder.contentTv.setText(bean.getMark());
+        if (!TextUtils.isEmpty(bean.getRemark()))
+            holder.contentTv.setText(bean.getRemark());
         //添加按钮
-        if (bean.getStatus().equals("STATUS_FRIEND_REQUEST_PADDING")) {
+        if (bean.getStatus() == 0) {
             holder.stateTv.setVisibility(View.GONE);
             holder.addFriendTv.setVisibility(View.VISIBLE);
             holder.addFriendTv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     //同意
-                    operation("agree", bean.get_id(), position);
+                    operation(bean.getId(), bean.getRequestId(), position);
                 }
             });
         } else {
-           holder.stateTv.setVisibility(View.VISIBLE);
-           holder.addFriendTv.setVisibility(View.GONE);
+            holder.stateTv.setVisibility(View.VISIBLE);
+            holder.addFriendTv.setVisibility(View.GONE);
         }
 
         return convertView;
     }
 
     //同意 好友
-    public void operation(String status, String requestId, final int position) {
-        OkGo.<String>post(Constants.TSHION_URL + Constants.operationRequest + status)
-                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
-                .params("request_id", requestId)
+    public void operation(String id, String requestId, final int position) {
+        Log.e("TAG", "requestId" + requestId);
+        org.json.JSONObject params = new org.json.JSONObject();
+        try {
+            params.put("sender", userInfo.getId());
+            params.put("receiver", id);
+            params.put("id", requestId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        OkGo.<String>post(Constants.FriendUrl + Constants.passFriendRequest)
+                .upJson(params)
                 .execute(new StringCallback() {
                     @Override
                     public void onSuccess(Response<String> response) {
+                        Log.e("TAG_addFriend", response.body());
                         JSONObject jsonObject = JSON.parseObject(response.body());
                         int status = jsonObject.getIntValue("status");
                         String message = jsonObject.getString("message");
                         if (status == 200) {
-                            mDatas.get(position).setStatus("STATUS_FRIEND_REQUEST_AGREE");
+                            mDatas.get(position).setStatus(1);
                             notifyDataSetChanged();
                             Activity activity = (Activity) context;
                             activity.setResult(1);
@@ -142,7 +154,7 @@ public class VerifyInfoAdapter extends BaseAdapter {
                     @Override
                     public void onError(Response<String> response) {
                         super.onError(response);
-
+                        Log.e("TAG_addFriend", response.getException().getMessage());
                     }
                 });
 
@@ -151,6 +163,6 @@ public class VerifyInfoAdapter extends BaseAdapter {
 
     public class VerifyHolder {
         private CircleImageView headCiv;
-        private TextView nickTv,  contentTv, addFriendTv,stateTv;
+        private TextView nickTv, contentTv, addFriendTv, stateTv;
     }
 }

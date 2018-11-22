@@ -18,7 +18,12 @@ import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.FileCallback;
 import com.lzy.okgo.model.Response;
 import com.yumeng.tillo.AddMemberActivity;
+import com.yumeng.tillo.DeleteMemberActivity;
+import com.yumeng.tillo.FriendInfoActivity;
+import com.yumeng.tillo.GroupMemberInfoActivity;
 import com.yumeng.tillo.R;
+
+import org.litepal.crud.DataSupport;
 
 import java.io.File;
 import java.io.Serializable;
@@ -26,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import application.MyApplication;
+import bean.FriendInfo;
 import bean.GroupMember;
 import bean.UserInfo;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -42,25 +48,34 @@ public class GroupMemberAdapter extends RecyclerView.Adapter<GroupMemberAdapter.
     private Context mContext;
     private UserInfo userInfo;
     private String fileForderPath;
-    private String groupId;
+    private String roomId;
+    private boolean isOwner = false;
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
         }
     };
-    private boolean isOwener = false;
+    private List<FriendInfo> mList;
 
-    public GroupMemberAdapter(Context context, String groupId, boolean isOwener) {
+    public GroupMemberAdapter(Context context, String roomId, boolean isOwner) {
         this.mContext = context;
-        this.groupId = groupId;
-        this.isOwener = isOwener;
+        this.roomId = roomId;
+        this.isOwner = isOwner;
         userInfo = AppSharePre.getPersonalInfo();
     }
 
     public void setDatas(List<GroupMember> list) {
         this.groupMemberList = list;
         notifyDataSetChanged();
+    }
+
+    public List<FriendInfo> getmList() {
+        return mList;
+    }
+
+    public void setmList(List<FriendInfo> mList) {
+        this.mList = mList;
     }
 
     @Override
@@ -72,14 +87,14 @@ public class GroupMemberAdapter extends RecyclerView.Adapter<GroupMemberAdapter.
     @Override
     public void onBindViewHolder(GroupMemberViewHolder holder, int position) {
 
-        if (position != getItemCount() - 1) {
+        if (position < getItemCount() - 2) {
             //判断是不是最后一个
             GroupMember item = groupMemberList.get(position);
             if (!TextUtils.isEmpty(item.getAvatar())) {
                 //头像地址不为空
                 if (headImageIsExist(item.getAvatar()))
                     Glide.with(MyApplication.getContext())
-                            .load(senderImagePath(item.getUid()))
+                            .load(senderImagePath(item.getUserId()))
                             .error(R.drawable.head)
                             .into(holder.headCiv);
                 else {
@@ -88,32 +103,69 @@ public class GroupMemberAdapter extends RecyclerView.Adapter<GroupMemberAdapter.
             } else
                 holder.headCiv.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.head));
             holder.nameTv.setText(item.getName());
-        } else if (position == getItemCount() - 1 && position != 0) {
+            //点击头像查看群成员信息
+            holder.headCiv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //判断
+                    if (userInfo.getId().equals(item.getUserId()))
+                        //点击的是自己
+                        return;
+                    List<FriendInfo> tempFriend = DataSupport.where("friend_id=?", item.getUserId())
+                            .find(FriendInfo.class);
+                    boolean isFriend = tempFriend.size() > 0 ? true : false;
+                    if (isFriend) {
+                        //好友信息
+                        Intent friendInfoIntent = new Intent(mContext, FriendInfoActivity.class);
+                        friendInfoIntent.putExtra("friendInfo", tempFriend.get(0));
+                        mContext.startActivity(friendInfoIntent);
+                    } else {
+                        //查看陌生人信息
+                        Intent groupMemberIntent = new Intent(mContext, GroupMemberInfoActivity.class);
+                        groupMemberIntent.putExtra("memberInfo", item);
+                        mContext.startActivity(groupMemberIntent);
+                    }
+                }
+            });
+        } else if (position == getItemCount() - 2 && position != 0) {
             holder.headCiv.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.add_member_icon));
             holder.headCiv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (isOwener) {
-                        //跳转到添加成员界面
-                        Intent addMemberIntent = new Intent(mContext, AddMemberActivity.class);
-                        addMemberIntent.putExtra("groupId", groupId);
-                        ((Activity) mContext).startActivityForResult(addMemberIntent, 1);
-                    } else
-                        ToastUtils.getInstance().shortToast("你不是群主，无法添加群成员！");
+                    //跳转到添加成员界面
+                    Intent addMemberIntent = new Intent(mContext, AddMemberActivity.class);
+                    addMemberIntent.putExtra("roomid", roomId);
+                    ((Activity) mContext).startActivityForResult(addMemberIntent, 1);
                 }
             });
 
+        } else if (position == getItemCount() - 1 && position != 0) {
+            //最后一个
+            holder.headCiv.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.delete_member_icon));
+            holder.headCiv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //跳转到删除成员界面
+                    if (isOwner) {
+                        Intent deleteMemberIntent = new Intent(mContext, DeleteMemberActivity.class);
+                        deleteMemberIntent.putExtra("roomid", roomId);
+                        deleteMemberIntent.putExtra("memberlist", (Serializable) getOtherMembers());
+                        ((Activity) mContext).startActivityForResult(deleteMemberIntent, 3);
+                    } else
+                        return;
+                }
+            });
         }
     }
 
     @Override
     public int getItemCount() {
         if (groupMemberList == null)
-            return 1;
+            return 2;
         else if (groupMemberList.size() < 10)
-            return groupMemberList.size() + 1;
+            return groupMemberList.size() + 2;
         else
-            return 11;
+            return 12;
     }
 
     class GroupMemberViewHolder extends RecyclerView.ViewHolder {
@@ -132,9 +184,9 @@ public class GroupMemberAdapter extends RecyclerView.Adapter<GroupMemberAdapter.
         if (TextUtils.isEmpty(groupMember.getAvatar()))
             return;
         boolean makeFolderState = utils.fileutil.FileUtils.makeFolders(fileForderPath);
-        File cameraFile = new File(fileForderPath, groupMember.getUid() + ".jpg");
+        File cameraFile = new File(fileForderPath, groupMember.getUserId() + ".jpg");
         OkGo.<File>get(groupMember.getAvatar())
-                .execute(new FileCallback(fileForderPath, groupMember.getUid() + ".jpg") {
+                .execute(new FileCallback(fileForderPath, groupMember.getUserId() + ".jpg") {
                     @Override
                     public void onSuccess(Response<File> response) {
                         File file = response.body();
@@ -167,4 +219,19 @@ public class GroupMemberAdapter extends RecyclerView.Adapter<GroupMemberAdapter.
     public String senderImagePath(String targetId) {
         return fileForderPath + File.separator + targetId + ".jpg";
     }
+
+    //从群成员中剔除群主（自己）
+    public List<GroupMember> getOtherMembers() {
+        int position = -1;
+        List<GroupMember> tempList = new ArrayList<>();
+        for (int i = 0; i < groupMemberList.size(); i++) {
+            if (groupMemberList.get(i).getUserId().equals(userInfo.getId())) {
+                position = i;
+            }
+        }
+        tempList.addAll(groupMemberList);
+        tempList.remove(position);
+        return tempList;
+    }
+
 }

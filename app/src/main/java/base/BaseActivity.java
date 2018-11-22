@@ -13,9 +13,13 @@ import android.view.View;
 
 import com.yumeng.tillo.R;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.List;
 
+import bean.MessageEvent;
 import bean.UserInfo;
+import constants.Constants;
 import utils.AppSharePre;
 import utils.StatusBarUtil;
 
@@ -158,9 +162,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         if (!isCurrentRunningForeground) {
+            EventBus.getDefault().post(new MessageEvent(Constants.TARGET_SERVICE, Constants.MESSAGE_INIT_CLIENT, null));
             Log.d("Base", ">>>>>>>>>>>>>>>>>>>切到前台 activity process");
         }
-
     }
 
     @Override

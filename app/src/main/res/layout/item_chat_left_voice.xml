@@ -51,7 +51,7 @@
                     android:layout_width="15dp"
                     android:layout_height="15dp"
                     android:layout_marginRight="10dp"
-                    android:background="@drawable/voice_left3" />
+                    android:src="@drawable/voice_left3" />
 
                 <TextView
                     android:id="@+id/item_chat_txt_left_duration"

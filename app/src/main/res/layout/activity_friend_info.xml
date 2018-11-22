@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#fff8f8f8"
+    android:orientation="vertical"
     tools:context="com.yumeng.tillo.FriendInfoActivity">
 
     <RelativeLayout
@@ -90,17 +90,17 @@
         </LinearLayout>
 
         <ImageView
-            android:onClick="messageClicked"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_marginRight="12dp"
+            android:onClick="messageClicked"
             android:src="@drawable/friend_message_icon" />
 
         <ImageView
             android:layout_width="35dp"
             android:layout_height="35dp"
-            android:onClick="phoneClicked"
             android:layout_marginRight="15dp"
+            android:onClick="phoneClicked"
             android:src="@drawable/friend_phone_icon" />
 
         <ImageView
@@ -200,7 +200,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_weight="1"
-            android:text="消息勿扰"
+            android:text="加入黑名单"
             android:textColor="#ff000000"
             android:textSize="15sp" />
 
@@ -220,19 +220,42 @@
         android:background="#FFF8F8F8" />
 
     <LinearLayout
+        android:id="@+id/friend_info_ll_clear"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:background="#ffffffff"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:text="清除对话"
+            android:textColor="#ffff6379"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="15dp"
+        android:background="#ffe5e5e5" />
+
+    <LinearLayout
         android:id="@+id/friend_info_ll_delete"
         android:layout_width="match_parent"
         android:layout_height="51dp"
         android:background="#ffffffff"
         android:gravity="center_vertical"
         android:orientation="horizontal">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="删除联系人"
             android:layout_marginLeft="16dp"
+            android:text="删除联系人"
             android:textColor="#ffff6379"
-            android:textSize="15sp"
-            />
+            android:textSize="15sp" />
     </LinearLayout>
 </LinearLayout>

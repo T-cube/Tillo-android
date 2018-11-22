@@ -29,7 +29,7 @@ public class AppSharePre {
      */
     public static String getToken() {
         UserInfo personalInfo = getPersonalInfo();
-        return personalInfo.getAccess_token();
+        return personalInfo.getToken();
     }
 
     /**

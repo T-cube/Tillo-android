@@ -82,9 +82,9 @@ public class MineFragment extends BaseFragment implements View.OnClickListener {
     protected void initView(View view, Bundle savedInstanceState) {
         userInfo = AppSharePre.getPersonalInfo();
         rxPermissions = new RxPermissions(getActivity());
-        fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getUid();
+        fileForderPath = FileUtils.getSDPath() + File.separator + userInfo.getId();
         boolean makeFolderState = FileUtils.makeFolders(fileForderPath);
-        imagePah = fileForderPath + File.separator + userInfo.getUid() + ".jpg";
+        imagePah = fileForderPath + File.separator + userInfo.getId() + ".jpg";
         headCiv = myFindViewsById(R.id.mine_civ_head);
         headCiv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,7 +107,7 @@ public class MineFragment extends BaseFragment implements View.OnClickListener {
                         @Override
                         public void accept(Boolean aBoolean) throws Exception {
                             if (aBoolean) {
-                                downloadHeadImage(userInfo.getAvatar(), userInfo.getUid(), headCiv);
+                                downloadHeadImage(userInfo.getAvatar(), userInfo.getId(), headCiv);
                             }
                         }
                     });
@@ -232,7 +232,7 @@ public class MineFragment extends BaseFragment implements View.OnClickListener {
     }
 
     public boolean headImageIsExist() {
-        File headImage = new File(fileForderPath, userInfo.getUid() + ".jpg");
+        File headImage = new File(fileForderPath, userInfo.getId() + ".jpg");
         if (headImage.exists())
             return true;
         else
@@ -248,40 +248,40 @@ public class MineFragment extends BaseFragment implements View.OnClickListener {
     }
 
     //上传图片
-    public void uploadHeadImage(String imagePath) {
-        progressDialog.show();
-        UserInfo userInfo = AppSharePre.getPersonalInfo();
-        final File file = new File(imagePath);
-        OkGo.<String>put(Constants.BaseUrl + Constants.uploadHead)
-                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
-                .params("avatar", file)
-                .execute(new StringCallback() {
-                    @Override
-                    public void onSuccess(Response<String> response) {
-                        progressDialog.dismiss();
-                        com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(response.body());
-                        com.alibaba.fastjson.JSONObject dataObject = JSON.parseObject(jsonObject.getString("data"));
-                        String avatar = dataObject.getString("avatar");
-                        userInfo.setAvatar(avatar);
-                        AppSharePre.setPersonalInfo(userInfo);
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                Glide.with(MyApplication.getContext()).load(imagePath)
-                                        .error(R.drawable.head)
-                                        .into(headCiv);
-                            }
-                        }, 200);
-
-                    }
-
-                    @Override
-                    public void onError(Response<String> response) {
-                        super.onError(response);
-                        progressDialog.dismiss();
-                    }
-                });
-    }
+//    public void uploadHeadImage(String imagePath) {
+//        progressDialog.show();
+//        UserInfo userInfo = AppSharePre.getPersonalInfo();
+//        final File file = new File(imagePath);
+//        OkGo.<String>put(Constants.BaseUrl + Constants.uploadHead)
+//                .headers("Authorization",userInfo.getToken())
+//                .params("avatar", file)
+//                .execute(new StringCallback() {
+//                    @Override
+//                    public void onSuccess(Response<String> response) {
+//                        progressDialog.dismiss();
+//                        com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(response.body());
+//                        com.alibaba.fastjson.JSONObject dataObject = JSON.parseObject(jsonObject.getString("data"));
+//                        String avatar = dataObject.getString("avatar");
+//                        userInfo.setAvatar(avatar);
+//                        AppSharePre.setPersonalInfo(userInfo);
+//                        handler.postDelayed(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                Glide.with(MyApplication.getContext()).load(imagePath)
+//                                        .error(R.drawable.head)
+//                                        .into(headCiv);
+//                            }
+//                        }, 200);
+//
+//                    }
+//
+//                    @Override
+//                    public void onError(Response<String> response) {
+//                        super.onError(response);
+//                        progressDialog.dismiss();
+//                    }
+//                });
+//    }
 
     //    @Override
 //    public void onActivityResult(int requestCode, int resultCode, Intent data) {

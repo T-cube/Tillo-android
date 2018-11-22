@@ -12,20 +12,26 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.RelativeLayout;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.flyco.dialog.listener.OnOperItemClickL;
+import com.flyco.dialog.widget.ActionSheetDialog;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.model.Response;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.yumeng.tillo.ChatActivity;
+import com.yumeng.tillo.GroupChatActivity;
 import com.yumeng.tillo.MainActivity;
 import com.yumeng.tillo.R;
 
@@ -50,6 +56,7 @@ import bean.ChatMessage;
 import bean.Conversation;
 import bean.FriendInfo;
 import bean.Group;
+import bean.GroupInfo;
 import bean.MessageEvent;
 import bean.UserInfo;
 import constants.Constants;
@@ -81,7 +88,24 @@ public class MessageFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
+        userInfo = AppSharePre.getPersonalInfo();
         getFriendList();
+    }
+
+
+//    @Override
+//    public void setUserVisibleHint(boolean isVisibleToUser) {
+//        if (isVisibleToUser) {
+//            userInfo = AppSharePre.getPersonalInfo();
+//            getFriendList();
+//            getGroupList();
+//            getSessionList();
+//        }
+//    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
     }
 
     @Override
@@ -94,10 +118,11 @@ public class MessageFragment extends BaseFragment {
                     @Override
                     public void accept(Boolean aBoolean) throws Exception {
                         if (aBoolean) {
+
                         }
                     }
                 });
-        userInfo = AppSharePre.getPersonalInfo();
+
         messageRv = myFindViewsById(R.id.fragment_message_rv);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -106,106 +131,175 @@ public class MessageFragment extends BaseFragment {
         messageRv.setAdapter(messageAdapter);
         initReceiver();
         messageAdapter.setOnItemClickListener((view1, position) -> {
-            FriendInfo friendInfo = dataList.get(position).getFriendInfo().get(0);
-            Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
-            chatIntent.putExtra("friendInfo", friendInfo);
-            startActivity(chatIntent);
+            if (dataList.get(position).getChatType().equals("single")) {
+                //单聊
+                FriendInfo friendInfo = dataList.get(position).getFriendInfo().get(0);
+                Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
+                chatIntent.putExtra("friendInfo", friendInfo);
+                startActivity(chatIntent);
+            } else {
+                //群聊
+                Intent chatIntent = new Intent(getActivity(), GroupChatActivity.class);
+                chatIntent.putExtra("groupInfo", getGroupInfo(dataList.get(position)));
+                startActivity(chatIntent);
+            }
+
         });
         messageAdapter.setOnItemLongClickListener((view12, position) -> {
             //弹出删除按钮
-            initBottomDialog(position);
+            showClearDialog(position, dataList.get(position).getRoomId());
         });
+    }
+
+    //获取groupInfo
+    public GroupInfo getGroupInfo(Conversation conversation) {
+        GroupInfo groupInfo = new GroupInfo();
+        groupInfo.setRoomId(conversation.getRoomId());
+        groupInfo.setAvatar(conversation.getAvatar());
+        groupInfo.setOwner(conversation.getOwner());
+        groupInfo.setName(conversation.getName());
+        return groupInfo;
     }
 
 
     //获取聊天会话列表
     public void getSessionList() {
-        boolean hasNetWork = SharedDataTool.getBoolean(getActivity(), "network");
-        if (hasNetWork) {
-            OkGo.<String>get(Constants.TSHION_URL + Constants.getChatSessionList)
-                    .headers("Authorization", "Bearer " + userInfo.getAccess_token())
-                    .execute(new StringCallback() {
-                        @Override
-                        public void onSuccess(Response<String> response) {
-                            com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(response.body());
-                            List<ChatBean> messageList = JSON.parseArray(jsonObject.getString("data"), ChatBean.class);
-                            if (messageList.size() > 0) {
-                                //加载首页消息数据
+        OkGo.<String>get(Constants.FriendUrl + Constants.getChatSessionList)
+                .headers("Authorization", userInfo.getToken())
+                .execute(new StringCallback() {
+                    @Override
+                    public void onSuccess(Response<String> response) {
+                        Log.e("TAG_conversation", response.body());
+                        com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(response.body());
+                        List<Conversation> messageList = JSON.parseArray(jsonObject.getString("data"), Conversation.class);
+                        if (messageList.size() > 0) {
+                            //加载首页消息数据
+                            dataList.clear();
+                            getChatListData(messageList);
+                            DataSupport.findAllAsync(Conversation.class).listen(new FindMultiCallback() {
+                                @Override
+                                public <T> void onFinish(List<T> t) {
+                                    dataList = (List<Conversation>) t;
+//                                        Collections.sort(dataList, new Comparator<Conversation>() {
+//                                            @Override
+//                                            public int compare(Conversation o1, Conversation o2) {
+//                                                int friend1 = o1.getFriendInfo().get(0).getIstop() == null ? 0 : Integer.parseInt(o1.getFriendInfo().get(0).getIstop());
+//                                                int friend2 = o2.getFriendInfo().get(0).getIstop() == null ? 0 : Integer.parseInt(o2.getFriendInfo().get(0).getIstop());
+//                                                if (friend1 > friend2)
+//                                                    return -1;
+//                                                else if (friend2 > friend1)
+//                                                    return 1;
+//                                                else
+//                                                    return 0;
+//                                            }
+//                                        });
+                                    handler.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            messageAdapter.setData(dataList);
+                                        }
+                                    }, 200);
+                                }
+                            });
+                            //如果有离线消息，显示消息红点
+                            EventBus.getDefault().post(new MessageEvent(Constants.TARGET_CHAT_FRAGMENT, Constants.MESSAGE_CHAT_DOT, null));
+
+                        } else {
+                            DataSupport.findAllAsync(Conversation.class).listen(new FindMultiCallback() {
+                                @Override
+                                public <T> void onFinish(List<T> t) {
+                                    dataList = (List<Conversation>) t;
+                                    handler.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+//                                                Collections.sort(dataList, new Comparator<Conversation>() {
+//                                                    @Override
+//                                                    public int compare(Conversation o1, Conversation o2) {
+//                                                        int friend1 = o1.getFriendInfo().get(0).getIstop() == null ? 0 : Integer.parseInt(o1.getFriendInfo().get(0).getIstop());
+//                                                        int friend2 = o2.getFriendInfo().get(0).getIstop() == null ? 0 : Integer.parseInt(o2.getFriendInfo().get(0).getIstop());
+//                                                        if (friend1 > friend2)
+//                                                            return -1;
+//                                                        else if (friend2 > friend1)
+//                                                            return 1;
+//                                                        else
+//                                                            return 0;
+//                                                    }
+//                                                });
+                                            messageAdapter.setData(dataList);
+                                        }
+                                    }, 200);
+                                }
+                            });
+                        }
+
+                    }
+
+                    @Override
+                    public void onError(Response<String> response) {
+                        super.onError(response);
+                        //无网络情况下 拉取本地记录
+                        DataSupport.findAllAsync(Conversation.class).listen(new FindMultiCallback() {
+                            @Override
+                            public <T> void onFinish(List<T> t) {
                                 dataList.clear();
-                                getChatListData(messageList);
-                                DataSupport.findAllAsync(Conversation.class).listen(new FindMultiCallback() {
+                                dataList = (List<Conversation>) t;
+//                    Collections.sort(dataList, new Comparator<Conversation>() {
+//                        @Override
+//                        public int compare(Conversation o1, Conversation o2) {
+//                            int friend1 = o1.getFriendInfo().get(0).getIstop() == null ? 0 : Integer.parseInt(o1.getFriendInfo().get(0).getIstop());
+//                            int friend2 = o2.getFriendInfo().get(0).getIstop() == null ? 0 : Integer.parseInt(o2.getFriendInfo().get(0).getIstop());
+//                            if (friend1 > friend2)
+//                                return -1;
+//                            else if (friend2 > friend1)
+//                                return 1;
+//                            else
+//                                return 0;
+//                        }
+//                    });
+                                handler.postDelayed(new Runnable() {
                                     @Override
-                                    public <T> void onFinish(List<T> t) {
-                                        dataList = (List<Conversation>) t;
-                                        handler.postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                messageAdapter.setData(dataList);
-                                            }
-                                        }, 200);
+                                    public void run() {
+                                        messageAdapter.setData(dataList);
                                     }
-                                });
-                            } else {
-                                DataSupport.findAllAsync(Conversation.class).listen(new FindMultiCallback() {
-                                    @Override
-                                    public <T> void onFinish(List<T> t) {
-                                        dataList = (List<Conversation>) t;
-                                        handler.postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                messageAdapter.setData(dataList);
-                                            }
-                                        }, 200);
-                                    }
-                                });
+                                }, 200);
                             }
+                        });
+                    }
+                });
 
-                        }
-
-                        @Override
-                        public void onError(Response<String> response) {
-                            super.onError(response);
-                        }
-                    });
-        } else {
-            //无网络情况下 拉取本地记录
-            DataSupport.findAllAsync(Conversation.class).listen(new FindMultiCallback() {
-                @Override
-                public <T> void onFinish(List<T> t) {
-                    dataList.clear();
-                    dataList = (List<Conversation>) t;
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            messageAdapter.setData(dataList);
-                        }
-                    }, 200);
-                }
-            });
-        }
 
     }
 
     //获取对话列表数据
-    public List<Conversation> getChatListData(List<ChatBean> list) {
+    public List<Conversation> getChatListData(List<Conversation> list) {
         List<Conversation> tempList = new ArrayList<>();
+        if (list.size() == 0)
+            return tempList;
         for (int i = 0; i < list.size(); i++) {
             Conversation conversation = new Conversation();
             //房间号
-            conversation.setRoomid(list.get(i).getMessage().getRoomid());
+            conversation.setRoomId(list.get(i).getRoomId());
             //时间戳
-            conversation.setTimestamp(list.get(i).getMessage().getTimestamp());
+            conversation.setTimestamp(list.get(i).getTimestamp());
             //未读消息
-            conversation.setUnread(list.get(i).getUnread());
-            //昵称
-            conversation.setName(list.get(i).getMember().getName());
-            //头像
-            conversation.setAvatar(list.get(i).getMember().getAvatar());
-            //用户id
-            conversation.setFriendId(list.get(i).getMember().get_id());
-            switch (list.get(i).getMessage().getType()) {
+            conversation.setMsgNum(list.get(i).getMsgNum());
+            //接收者
+            conversation.setChatType(list.get(i).getChatType());
+            if (conversation.getChatType().equals("single")) {
+                //昵称
+                conversation.setName(list.get(i).getFriendInfo().get(0).getShowname());
+                //头像
+                conversation.setAvatar(list.get(i).getFriendInfo().get(0).getAvatar());
+            } else {
+                conversation.setName(list.get(i).getGroupInfo().get(0).getName());
+                //头像
+                conversation.setAvatar(list.get(i).getGroupInfo().get(0).getAvatar());
+            }
+            //类型
+            conversation.setType(list.get(i).getType());
+            switch (list.get(i).getType()) {
                 case "text":
-                    conversation.setContent(list.get(i).getMessage().getContent());
+                    conversation.setContent(list.get(i).getContent());
                     break;
                 case "image":
                     conversation.setContent("...[图片]");
@@ -223,7 +317,7 @@ public class MessageFragment extends BaseFragment {
 //                    conversation.setContent();
 //                    break;
             }
-            boolean isSave = conversation.saveOrUpdate("roomid=?", list.get(i).getMessage().getRoomid());
+            boolean isSave = conversation.saveOrUpdate("roomid=?", list.get(i).getRoomId());
             tempList.add(conversation);
         }
         return tempList;
@@ -231,6 +325,7 @@ public class MessageFragment extends BaseFragment {
 
     //收到新消息
     public void receiveNewsMessage(ChatMessage messageBean) {
+        Activity currentActivity = MyApplication.getCurrentActivity();
         Conversation conversation = null;
         List<Conversation> conversationsList = DataSupport.where("roomid=?", messageBean.getRoomid()).find(Conversation.class);
         int unreadTemp = 0;
@@ -241,25 +336,54 @@ public class MessageFragment extends BaseFragment {
         } else {
             //新的会话
             conversation = new Conversation();
-            conversation.setRoomid(messageBean.getRoomid());
+            conversation.setRoomId(messageBean.getRoomid());
             unreadTemp = 1;
         }
-        FriendInfo friendInfo = conversation.getFriendInfo().get(0);
-        conversation.setFriendId(friendInfo.getFriend_id());
-        conversation.setAvatar(friendInfo.getAvatar());
-        conversation.setName(friendInfo.getName());
-        Activity currentActivity = MyApplication.getCurrentActivity();
-        //不存在的会话,则判断当前界面是否是主界面
-        if (currentActivity instanceof MainActivity) {
-            //如果是主界面，未读消息为1
-            conversation.setOnlineMessage(unreadTemp);
+        if (messageBean.getReceiver() != null) {
+            //单聊
+            FriendInfo friendInfo = conversation.getFriendInfo().get(0);
+            conversation.setAvatar(friendInfo.getAvatar());
+            conversation.setName(friendInfo.getName());
+            conversation.setChatType("single");
+            //不存在的会话,则判断当前界面是否是主界面
+            if (currentActivity instanceof MainActivity) {
+                //如果是主界面，未读消息为1
+                conversation.setOnlineMessage(unreadTemp);
+//                EventBus.getDefault().post(new MessageEvent(Constants.TARGET_CHAT_FRAGMENT, Constants.MESSAGE_CHAT_DOT, null));
+            } else if (currentActivity instanceof ChatActivity) {
+                //聊天界面不是 对应的消息会话界面
+                if (!((ChatActivity) currentActivity).getRoomId().equals(messageBean.getRoomid())) {
+                    conversation.setOnlineMessage(unreadTemp);
+//                    EventBus.getDefault().post(new MessageEvent(Constants.TARGET_CHAT_FRAGMENT, Constants.MESSAGE_CHAT_DOT, null));
+                }
+            }
+        } else {
+            //群聊
+            List<GroupInfo> groupInfoList = DataSupport.where("roomid=?", messageBean.getRoomid()).find(GroupInfo.class);
+            conversation.setAvatar(groupInfoList.get(0).getAvatar());
+            conversation.setRoomId(groupInfoList.get(0).getRoomId());
+            conversation.setName(groupInfoList.get(0).getName());
+            conversation.setOwner(groupInfoList.get(0).getOwner());
+            conversation.setChatType("group");
+            if (currentActivity instanceof MainActivity) {
+                //如果是主界面，未读消息为1
+                conversation.setOnlineMessage(unreadTemp);
+//                if (!messageBean.getSender().equals(userInfo.getId()))
+//                    EventBus.getDefault().post(new MessageEvent(Constants.TARGET_CHAT_FRAGMENT, Constants.MESSAGE_GROUP_CHAT_DOT, null));
 //            if (!messageBean.getFrom().equals(userInfo.getUid()))
 //                messageBean.save();
-        } else if (currentActivity instanceof ChatActivity) {
-            //聊天界面不是 对应的消息会话界面
-            if (!((ChatActivity) currentActivity).getRoomId().equals(messageBean.getRoomid()))
-                conversation.setOnlineMessage(unreadTemp);
+            } else if (currentActivity instanceof GroupChatActivity) {
+                //聊天界面不是 对应的消息会话界面
+                if (!((GroupChatActivity) currentActivity).getRoomId().equals(messageBean.getRoomid())) {
+//                    if (!messageBean.getSender().equals(userInfo.getId())) {
+                    //不是自己发送的消息
+                    conversation.setOnlineMessage(unreadTemp);
+//                        EventBus.getDefault().post(new MessageEvent(Constants.TARGET_CHAT_FRAGMENT, Constants.MESSAGE_GROUP_CHAT_DOT, null));
+//                    }
+                }
+            }
         }
+
         String content = "";
         switch (messageBean.getType()) {
             case "text":
@@ -285,6 +409,19 @@ public class MessageFragment extends BaseFragment {
             @Override
             public <T> void onFinish(List<T> t) {
                 dataList = (List<Conversation>) t;
+//                Collections.sort(dataList, new Comparator<Conversation>() {
+//                    @Override
+//                    public int compare(Conversation o1, Conversation o2) {
+//                        int friend1 = o1.getFriendInfo().get(0).getIstop() == null ? 0 : Integer.parseInt(o1.getFriendInfo().get(0).getIstop());
+//                        int friend2 = o2.getFriendInfo().get(0).getIstop() == null ? 0 : Integer.parseInt(o2.getFriendInfo().get(0).getIstop());
+//                        if (friend1 > friend2)
+//                            return -1;
+//                        else if (friend2 > friend1)
+//                            return 1;
+//                        else
+//                            return 0;
+//                    }
+//                });
                 messageAdapter.setData(dataList);
             }
         });
@@ -292,51 +429,54 @@ public class MessageFragment extends BaseFragment {
 
     //获取好友列表
     public void getFriendList() {
-        boolean hasNetWork = SharedDataTool.getBoolean(getActivity(), "network");
-        if (hasNetWork) {
-            OkGo.<String>get(Constants.TSHION_URL + Constants.getFriendList)
-                    .headers("Authorization", "Bearer " + userInfo.getAccess_token())
-                    .execute(new StringCallback() {
-                        @Override
-                        public void onSuccess(Response<String> response) {
-                            com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(response.body());
-                            String message = jsonObject.getString("message");
-                            int status = jsonObject.getIntValue("status");
-                            if (status == 200) {
-                                //获取好友列表
-                                mList = JSON.parseArray(jsonObject.getString("data"), FriendInfo.class);
-                                //对集合排序
-                                Collections.sort(mList, new Comparator<FriendInfo>() {
-                                    @Override
-                                    public int compare(FriendInfo lhs, FriendInfo rhs) {
-                                        //根据拼音进行排序
-                                        return lhs.getPinyin().compareTo(rhs.getPinyin().toUpperCase());
-                                    }
-                                });
-                                //将列表存入数据库
-                                updateFriendList(mList);
-
-                            } else {
-                                ToastUtils.getInstance().shortToast(message);
-                            }
+        OkGo.<String>get(Constants.FriendUrl + Constants.getFriendList)
+                .headers("Authorization", userInfo.getToken())
+                .execute(new StringCallback() {
+                    @Override
+                    public void onSuccess(Response<String> response) {
+                        Log.e("TAG_getFriend_message", response.body());
+                        com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(response.body());
+                        String message = jsonObject.getString("message");
+                        int status = jsonObject.getIntValue("status");
+                        if (status == 200) {
+                            //获取好友列表
+                            mList = JSON.parseArray(jsonObject.getString("data"), FriendInfo.class);
+                            //对集合排序
+                            Collections.sort(mList, new Comparator<FriendInfo>() {
+                                @Override
+                                public int compare(FriendInfo lhs, FriendInfo rhs) {
+                                    //根据拼音进行排序
+                                    return lhs.getPinyin().compareTo(rhs.getPinyin().toUpperCase());
+                                }
+                            });
+                            //将列表存入数据库
+                            updateFriendList(mList);
+                        } else {
+                            ToastUtils.getInstance().shortToast(message);
                         }
+                    }
 
-                        @Override
-                        public void onError(Response<String> response) {
-                            super.onError(response);
-                        }
-                    });
-        } else {
-            getSessionList();
-        }
+                    @Override
+                    public void onError(Response<String> response) {
+                        super.onError(response);
+                        Log.e("TAG_getFriend_error", response.getException().getMessage());
+                    }
+                });
+
     }
 
     //保存好友列表
     public void updateFriendList(final List<FriendInfo> dataList) {
-        if (dataList == null)
+        if (dataList == null) {
+//            getSessionList();
+            getGroupList();
             return;
-        if (dataList.size() == 0)
+        }
+        if (dataList.size() == 0) {
+//            getSessionList();
+            getGroupList();
             return;
+        }
         for (FriendInfo friendInfo : dataList) {
             FriendInfo tempFriend = new FriendInfo();
             tempFriend.setFriend_id(friendInfo.getFriend_id());
@@ -345,44 +485,56 @@ public class MessageFragment extends BaseFragment {
             tempFriend.setName(friendInfo.getName());
             tempFriend.setHeaderWord(friendInfo.getHeaderWord());
             tempFriend.setNickname(friendInfo.getNickname());
-            tempFriend.setRoomid(friendInfo.getRoomid());
+            tempFriend.setRoomId(friendInfo.getRoomId());
             tempFriend.setShowname(friendInfo.getShowname());
-            tempFriend.saveOrUpdate("roomid=?", friendInfo.getRoomid());
+//            tempFriend.setBlock(friendInfo.getSettings().getBlock() + "");
+//            tempFriend.setNot_disturb(friendInfo.getSettings().getNot_disturb() + "");
+            tempFriend.saveOrUpdate("roomid=?", friendInfo.getRoomId());
         }
-        getSessionList();
+        getGroupList();
     }
-    public void initBottomDialog(int position) {
-        final Dialog dialog = new Dialog(getActivity(), R.style.AlertDialogStyle);
-        View inflate = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_delete, null);
-        dialog.setContentView(inflate);
-        Window dialogWindow = dialog.getWindow();
-        WindowManager.LayoutParams params = dialogWindow.getAttributes();
-        params.width = getActivity().getWindowManager().getDefaultDisplay().getWidth();
-        dialogWindow.setGravity(Gravity.BOTTOM);
-        dialogWindow.setAttributes(params);
-        dialog.setCancelable(true);
-        dialog.show();
-        RelativeLayout deleteRl = Utils.findViewsById(inflate, R.id.dialog_delete_rl_delete);
-        deleteRl.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dataList.remove(position);
-                handler.postDelayed(new Runnable() {
+
+    //获取群列表
+    public void getGroupList() {
+        Log.e("TAG_group", "获取群列表");
+        OkGo.<String>get(Constants.GroupUrl + Constants.getGroupList)
+                .headers("Authorization", userInfo.getToken())
+                .execute(new StringCallback() {
                     @Override
-                    public void run() {
-                        messageAdapter.notifyDataSetChanged();
+                    public void onSuccess(Response<String> response) {
+                        Log.e("TAG_groupList", response.body());
+                        com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(response.body());
+                        List<GroupInfo> tempList = JSONArray.parseArray(jsonObject.getString("data"), GroupInfo.class);
+                        if (tempList != null) {
+                            if (tempList.size() > 0) {
+                                //保存列表到数据库
+                                saveGroupListToDatabase(tempList);
+                            }
+                        }
+                        getSessionList();
                     }
-                }, 200);
-                dialog.dismiss();
-            }
-        });
-        RelativeLayout cancelRl = Utils.findViewsById(inflate, R.id.dialog_delete_rl_cancel);
-        cancelRl.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
+
+                    @Override
+                    public void onError(Response<String> response) {
+                        //从数据库获取
+                        Log.e("TAG_groupList", response.getException().getMessage());
+                    }
+                });
+    }
+
+    public void saveGroupListToDatabase(List<GroupInfo> templist) {
+        if (templist == null)
+            return;
+        if (templist.size() == 0)
+            return;
+        for (GroupInfo info : templist) {
+            GroupInfo tempInfo = new GroupInfo();
+            tempInfo.setOwner(info.getOwner());
+            tempInfo.setRoomId(info.getRoomId());
+            tempInfo.setName(info.getName());
+            tempInfo.setAvatar(info.getAvatar());
+            tempInfo.saveOrUpdate("roomid=?", info.getRoomId());
+        }
     }
 
 
@@ -409,6 +561,19 @@ public class MessageFragment extends BaseFragment {
                     @Override
                     public <T> void onFinish(List<T> t) {
                         dataList = (List<Conversation>) t;
+//                        Collections.sort(dataList, new Comparator<Conversation>() {
+//                            @Override
+//                            public int compare(Conversation o1, Conversation o2) {
+//                                int friend1 = o1.getFriendInfo().get(0).getIstop() == null ? 0 : Integer.parseInt(o1.getFriendInfo().get(0).getIstop());
+//                                int friend2 = o2.getFriendInfo().get(0).getIstop() == null ? 0 : Integer.parseInt(o2.getFriendInfo().get(0).getIstop());
+//                                if (friend1 > friend2)
+//                                    return -1;
+//                                else if (friend2 > friend1)
+//                                    return 1;
+//                                else
+//                                    return 0;
+//                            }
+//                        });
                         handler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -417,10 +582,45 @@ public class MessageFragment extends BaseFragment {
                         }, 200);
                     }
                 });
+            }else if (behavior.equals(Constants.MESSAGE_EVENT_GROUP_INVITE)){
+                //重新获取群组列表
+                Log.e("TAG_GroupList","重新获取群列表");
+                getGroupList();
             }
 
         }
     }
+
+    public void showClearDialog(int itemPosition, String roomid) {
+        final String[] stringItems = {"清除所有信息"};
+        final ActionSheetDialog dialog = new ActionSheetDialog(getActivity(), stringItems, null);
+        dialog.title("删除信息")//
+                .titleTextSize_SP(14.5f)//
+                .show();
+        dialog.setOnOperItemClickL(new OnOperItemClickL() {
+            @Override
+            public void onOperItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 0) {
+                    clearChatRecorder(itemPosition, roomid);
+                }
+                dialog.dismiss();
+            }
+        });
+    }
+
+    //清除聊天记录
+    public void clearChatRecorder(int itemPosition, String roomid) {
+        DataSupport.deleteAll(ChatMessage.class, "roomid=?", roomid);
+        DataSupport.deleteAll(Conversation.class, "roomid=?", roomid);
+        dataList.remove(itemPosition);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                messageAdapter.notifyDataSetChanged();
+            }
+        }, 200);
+    }
+
 
     /**
      * 广播配置

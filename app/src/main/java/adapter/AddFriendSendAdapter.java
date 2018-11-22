@@ -24,12 +24,19 @@ import com.bumptech.glide.Glide;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.model.Response;
+import com.yumeng.tillo.ChatActivity;
 import com.yumeng.tillo.FriendVerifyActivity;
 import com.yumeng.tillo.R;
 
+import org.json.JSONException;
+import org.litepal.crud.DataSupport;
+
 import java.util.List;
 
+import application.MyApplication;
 import bean.AddFriendBean;
+import bean.Conversation;
+import bean.FriendInfo;
 import bean.UserInfo;
 import constants.Constants;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -74,14 +81,28 @@ public class AddFriendSendAdapter extends RecyclerView.Adapter<AddFriendSendAdap
         holder.nickTv.setText(bean.getName());
         holder.phoneTv.setText(bean.getMobile());
         Glide.with(mContext).load(bean.getAvatar()).error(R.drawable.head).into(holder.headCiv);
+        if (bean.getRoomId() != null) {
+            holder.addFriendTv.setText("发消息");
+        } else {
+            holder.addFriendTv.setText("添加");
+        }
         holder.addFriendTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //发送添加好友请求
 //                initMarkDialog(bean.get_id());
-                Intent friendVerify = new Intent(mContext, FriendVerifyActivity.class);
-                friendVerify.putExtra("_id", bean.get_id());
-                mContext.startActivity(friendVerify);
+                if (bean.getRoomId() != null) {
+                    Intent chatIntent = new Intent(mContext, ChatActivity.class);
+                    List<FriendInfo> list = DataSupport.where("friend_id=?", bean.get_id()).find(FriendInfo.class);
+                    FriendInfo friendInfo = list.get(0);
+                    chatIntent.putExtra("friendInfo", friendInfo);
+                    MyApplication.closeActivityExceptMain();
+                    mContext.startActivity(chatIntent);
+                } else {
+                    //发送添加好友请求
+                    Intent friendVerify = new Intent(mContext, FriendVerifyActivity.class);
+                    friendVerify.putExtra("_id", bean.get_id());
+                    mContext.startActivity(friendVerify);
+                }
             }
         });
     }
@@ -110,10 +131,17 @@ public class AddFriendSendAdapter extends RecyclerView.Adapter<AddFriendSendAdap
 
     //发送添加好友请求
     public void sendFriendRequest(String requestId, String mark) {
-        OkGo.<String>post(Constants.TSHION_URL + Constants.addFriendRequest)
-                .headers("Authorization", "Bearer " + userInfo.getAccess_token())
-                .params("user_id", requestId)
-                .params("mark", mark)
+        org.json.JSONObject params = new org.json.JSONObject();
+        try {
+            params.put("remark", mark);
+            params.put("sender", userInfo.getId());
+            params.put("receiver", requestId);
+            params.put("status", 0);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        OkGo.<String>post(Constants.FriendUrl + Constants.addFriendRequest)
+                .upJson(params)
                 .execute(new StringCallback() {
                     @Override
                     public void onSuccess(Response<String> response) {
@@ -124,7 +152,6 @@ public class AddFriendSendAdapter extends RecyclerView.Adapter<AddFriendSendAdap
                         } else {
                             ToastUtils.getInstance().shortToast(message);
                         }
-
                     }
 
                     @Override
